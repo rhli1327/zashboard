@@ -1,19 +1,17 @@
-FROM --platform=linux/amd64 docker.io/guergeiro/pnpm:lts-latest AS builder
+FROM docker.io/node:24-alpine AS builder
 
 WORKDIR /build
 
-COPY . .
+RUN npm install --global pnpm@10.15.0
 
-RUN pnpm install
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
+
+COPY . .
 RUN pnpm build
 
-FROM docker.io/caddy:alpine
+FROM docker.io/nginx:alpine
 
 EXPOSE 80
 
-WORKDIR /srv
-
-COPY --from=builder /build/dist/. .
-COPY Caddyfile .
-
-CMD ["caddy", "run"]
+COPY --from=builder /build/dist/ /usr/share/nginx/html/
