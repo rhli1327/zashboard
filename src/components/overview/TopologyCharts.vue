@@ -85,6 +85,7 @@
 </template>
 
 <script setup lang="ts">
+import { formatGeoIPInfo, getGeoIPInfoSync } from '@/api/geoip'
 import { backgroundImage } from '@/helper/indexeddb'
 import { getConnectionChains, getConnectionRule, getConnectionSourceIP } from '@/helper'
 import { getIPLabelFromMap } from '@/helper/sourceip'
@@ -165,9 +166,10 @@ const sankeyData = computed(() => {
   const linkMap = new Map<string, number>()
   const layerMap = new Map<string, number>()
   const nodeTypeMap = new Map<string, string>()
+  const sourceIPGeoIPMap = new Map<string, string>()
   let nodeIndex = 0
 
-  const addNode = (name: string, layer: number, type: string) => {
+  const addNode = (name: string, layer: number, type: string, sourceIPGeoIP = '') => {
     // 同名节点在不同层需要视为不同节点，否则会在 Sankey 中形成错误回路
     const nodeKey = `${layer}:${name}`
 
@@ -177,11 +179,16 @@ const sankeyData = computed(() => {
       layerMap.set(nodeKey, layer)
       nodeTypeMap.set(nodeKey, type)
     }
+    if (sourceIPGeoIP) {
+      sourceIPGeoIPMap.set(nodeKey, sourceIPGeoIP)
+    }
     return nodeMap.get(nodeKey)!
   }
 
   connections.forEach((conn) => {
-    const sourceIP = getIPLabelFromMap(getConnectionSourceIP(conn))
+    const sourceIPAddress = getConnectionSourceIP(conn)
+    const sourceIP = getIPLabelFromMap(sourceIPAddress)
+    const sourceIPGeoIP = formatGeoIPInfo(getGeoIPInfoSync(sourceIPAddress, true))
     const rulePayload = getConnectionRule(conn)
     const chains = getConnectionChains(conn)
 
@@ -190,7 +197,7 @@ const sankeyData = computed(() => {
     const chainLast = chains[chains.length - 1]
     const chainFirst = chains[0]
 
-    const sourceNode = addNode(sourceIP, 0, t('sourceIPAddress'))
+    const sourceNode = addNode(sourceIP, 0, t('sourceIPAddress'), sourceIPGeoIP)
     const ruleNode = addNode(rulePayload, 1, t('ruleMatch'))
 
     if (chainFirst === chainLast) {
@@ -220,6 +227,7 @@ const sankeyData = computed(() => {
     id: index,
     name: nodeNameMap.get(nodeKey) || '',
     nodeType: nodeTypeMap.get(nodeKey) || t('unknown'),
+    sourceIPGeoIP: sourceIPGeoIPMap.get(nodeKey) || '',
     layer: layerMap.get(nodeKey) || 0,
     itemStyle: {
       color: layerColors[layerMap.get(nodeKey) || 0],
@@ -308,17 +316,22 @@ const options = computed(() => ({
         target: number
         value: number
         originalValue?: number
+        sourceIPGeoIP?: string
       }
     }) => {
       if (params.dataType === 'node') {
-        return `${params.data.name}<br/>${t('nodeType')}: ${params.data.nodeType || t('unknown')}`
+        const sourceIPGeoIP = params.data.sourceIPGeoIP
+
+        return `${params.data.name}<br/>${t('nodeType')}: ${params.data.nodeType || t('unknown')}${sourceIPGeoIP ? `<br/>${t('sourceIPGeoIP')}: ${sourceIPGeoIP}` : ''}`
       } else if (params.dataType === 'edge') {
         const sourceNode = sankeyData.value.nodes.find((n) => n.id === params.data.source)
         const targetNode = sankeyData.value.nodes.find((n) => n.id === params.data.target)
         // 使用原始值显示真实的连接数量
         const displayValue = params.data.originalValue || params.data.value
         if (sourceNode && targetNode) {
-          return `${sourceNode.name} → ${targetNode.name}<br/>${t('connectionCount')}: ${displayValue}`
+          const sourceIPGeoIP = sourceNode.sourceIPGeoIP
+
+          return `${sourceNode.name} → ${targetNode.name}${sourceIPGeoIP ? `<br/>${t('sourceIPGeoIP')}: ${sourceIPGeoIP}` : ''}<br/>${t('connectionCount')}: ${displayValue}`
         }
         return `${t('connectionCount')}: ${displayValue}`
       }
@@ -345,10 +358,14 @@ const options = computed(() => ({
       label: {
         color: colorSet.baseContent,
         fontSize: isMiddleScreen.value ? 10 : 12,
-        formatter: (params: { name: string }) => {
-          const name = params.name
+        formatter: (params: { name: string; data: { sourceIPGeoIP?: string } }) => {
           const length = isFullScreen.value ? 45 : isMiddleScreen.value ? 20 : 30
-          return name.length > length ? name.substring(0, length) + '...' : name
+          const truncate = (value: string) =>
+            value.length > length ? value.substring(0, length) + '...' : value
+          const name = truncate(params.name)
+          const sourceIPGeoIP = params.data.sourceIPGeoIP
+
+          return sourceIPGeoIP ? `${name}\n${truncate(sourceIPGeoIP)}` : name
         },
       },
       nodeGap: 4,

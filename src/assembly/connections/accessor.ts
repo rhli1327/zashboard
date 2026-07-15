@@ -3,7 +3,7 @@
 // 读取/派生 view 需要的字段 —— 不再把 sing-box 塑造成 clash 形状。
 // createGetConnectionDisplayValue 基于某一份 accessor 生成对应后端的 getConnectionDisplayValue,
 // 由 index.ts 门面按当前后端动态选用。
-import { getGeoIPInfoSync } from '@/api/geoip'
+import { formatGeoIPInfo, getGeoIPInfoSync } from '@/api/geoip'
 import { CONNECTIONS_TABLE_ACCESSOR_KEY, PROXY_CHAIN_DIRECTION } from '@/constant'
 import { getIPLabelFromMap } from '@/helper/sourceip'
 import { fromNow, prettyBytesHelper } from '@/helper/utils'
@@ -116,6 +116,8 @@ export const createGetConnectionDisplayValue =
         return fromNow(accessor.start(connection))
       case CONNECTIONS_TABLE_ACCESSOR_KEY.SourceIP:
         return getIPLabelFromMap(accessor.sourceIP(connection))
+      case CONNECTIONS_TABLE_ACCESSOR_KEY.SourceIPGeoIP:
+        return formatGeoIPInfo(getGeoIPInfoSync(accessor.sourceIP(connection), true))
       case CONNECTIONS_TABLE_ACCESSOR_KEY.SourcePort:
         return accessor.sourcePort(connection)
       case CONNECTIONS_TABLE_ACCESSOR_KEY.SniffHost:
@@ -124,11 +126,8 @@ export const createGetConnectionDisplayValue =
         return accessor.destination(connection)
       case CONNECTIONS_TABLE_ACCESSOR_KEY.DestinationType:
         return getDestinationType(accessor.destination(connection))
-      case CONNECTIONS_TABLE_ACCESSOR_KEY.GeoIP: {
-        const { country, organization } = getGeoIPInfoSync(accessor.destination(connection))
-
-        return [country, organization].filter(Boolean).join(' / ')
-      }
+      case CONNECTIONS_TABLE_ACCESSOR_KEY.GeoIP:
+        return formatGeoIPInfo(getGeoIPInfoSync(accessor.destination(connection)))
       case CONNECTIONS_TABLE_ACCESSOR_KEY.RemoteAddress:
         return accessor.remoteAddress(connection) || '-'
       case CONNECTIONS_TABLE_ACCESSOR_KEY.InboundUser:

@@ -176,6 +176,7 @@ const zhTW: LANG_MESSAGE = {
   sortBy: '排序方式',
   rule: '規則',
   sourceIP: '源IP',
+  sourceIPGeoIP: '源IP歸屬',
   activeConnections: '活躍',
   closedConnections: '已關閉',
   logLevel: '日誌等級',
@@ -190,10 +191,13 @@ const zhTW: LANG_MESSAGE = {
   destination: '解析地址',
   destinationType: '解析類型',
   geoip: '歸屬資訊',
-  geoipCountryDatabaseURL: 'GeoIP 國家庫地址',
+  geoipCityDatabaseURL: 'GeoIP 城市/地區庫地址',
   geoipASNDatabaseURL: 'GeoIP ASN 庫地址',
+  geoipIPInfoToken: 'IPinfo Token（選填）',
+  geoipIPInfoTokenTip:
+    '僅在本機城市庫缺少地區和城市時查詢 IPinfo。留空使用匿名介面；填寫後請求會附帶該 Token。查詢結果會快取在瀏覽器中。',
   geoipDatabaseURLTip:
-    '用於本地解析連線 IP 的歸屬資訊(國家 / ASN),從該地址載入 mmdb 並快取在瀏覽器中。留空則使用預設地址。',
+    '用於本地解析連線 IP 的歸屬資訊(國家 / 地區 / 城市 / ASN),從該地址載入 mmdb 並快取在瀏覽器中。留空則使用預設地址。',
   inboundUser: '入站用戶',
   outboundType: '出站類型',
   fromOutbound: '來源出站',

@@ -79,12 +79,16 @@ export const SETTINGS_CATEGORIES: SettingsCategory[] = [
       },
       { key: `${SETTINGS_MENU_KEY.general}.IPInfoAPI`, label: 'IPInfoAPI' },
       {
-        key: `${SETTINGS_MENU_KEY.general}.geoipCountryDatabaseURL`,
-        label: 'geoipCountryDatabaseURL',
+        key: `${SETTINGS_MENU_KEY.general}.geoipCityDatabaseURL`,
+        label: 'geoipCityDatabaseURL',
       },
       {
         key: `${SETTINGS_MENU_KEY.general}.geoipASNDatabaseURL`,
         label: 'geoipASNDatabaseURL',
+      },
+      {
+        key: `${SETTINGS_MENU_KEY.general}.geoipIPInfoToken`,
+        label: 'geoipIPInfoToken',
       },
       {
         key: `${SETTINGS_MENU_KEY.general}.scrollAnimationEffect`,

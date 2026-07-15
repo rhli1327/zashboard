@@ -195,6 +195,7 @@
 </template>
 
 <script setup lang="ts">
+import { formatGeoIPInfo, getGeoIPInfoSync } from '@/api/geoip'
 import { ConnectionHistoryType, clearConnectionHistoryFromIndexedDB } from '@/helper/indexeddb'
 import { showNotification } from '@/helper/notification'
 import { getIPLabelFromMap } from '@/helper/sourceip'
@@ -285,6 +286,8 @@ const aggregateSourceLabel = computed(() => {
   }
 })
 
+const getSourceIPGeoIP = (ip: string) => formatGeoIPInfo(getGeoIPInfoSync(ip, true))
+
 const columns = computed<ColumnDef<ConnectionHistoryData>[]>(() => {
   const keyColumn: ColumnDef<ConnectionHistoryData> = {
     header: () => aggregateSourceLabel.value,
@@ -303,8 +306,14 @@ const columns = computed<ColumnDef<ConnectionHistoryData>[]>(() => {
     },
   }
 
-  return [
-    keyColumn,
+  const sourceIPGeoIPColumn: ColumnDef<ConnectionHistoryData> = {
+    header: () => t('sourceIPGeoIP'),
+    id: 'sourceIPGeoIP',
+    accessorFn: (row) => getSourceIPGeoIP(row.key),
+    cell: ({ row }) => getSourceIPGeoIP(row.original.key),
+  }
+
+  const metricColumns: ColumnDef<ConnectionHistoryData>[] = [
     {
       header: () => t('download'),
       id: 'download',
@@ -340,6 +349,12 @@ const columns = computed<ColumnDef<ConnectionHistoryData>[]>(() => {
       sortingFn: (prev, next) => prev.original.count - next.original.count,
       sortDescFirst: true,
     },
+  ]
+
+  return [
+    keyColumn,
+    ...(aggregationType.value === ConnectionHistoryType.SourceIP ? [sourceIPGeoIPColumn] : []),
+    ...metricColumns,
   ]
 })
 

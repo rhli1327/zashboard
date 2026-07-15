@@ -175,6 +175,7 @@ const en = {
   sortBy: 'Sort by',
   rule: 'Rule',
   sourceIP: 'Source IP',
+  sourceIPGeoIP: 'Source IP GeoIP',
   activeConnections: 'Active',
   closedConnections: 'Closed',
   logLevel: 'Log level',
@@ -189,10 +190,13 @@ const en = {
   destination: 'Resolved address',
   destinationType: 'Resolved type',
   geoip: 'GeoIP',
-  geoipCountryDatabaseURL: 'GeoIP country database URL',
+  geoipCityDatabaseURL: 'GeoIP city database URL',
   geoipASNDatabaseURL: 'GeoIP ASN database URL',
+  geoipIPInfoToken: 'IPinfo token (optional)',
+  geoipIPInfoTokenTip:
+    'IPinfo is queried only when the local city database has no region or city. Leave empty for anonymous requests; when set, the token is included. Results are cached in the browser.',
   geoipDatabaseURLTip:
-    'Used to resolve the GeoIP info (country / ASN) of connection IPs locally. The mmdb is loaded from this URL and cached in the browser. Leave empty to use the default.',
+    'Used to resolve the GeoIP info (country / region / city / ASN) of connection IPs locally. The mmdb is loaded from this URL and cached in the browser. Leave empty to use the default.',
   inboundUser: 'Inbound user',
   outboundType: 'Outbound type',
   fromOutbound: 'From outbound',

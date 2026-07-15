@@ -227,6 +227,7 @@ const sectionDefs: { id: string; keys: CONNECTIONS_TABLE_ACCESSOR_KEY[] }[] = [
     id: 'sourceAndDestination',
     keys: [
       KEY.SourceIP,
+      KEY.SourceIPGeoIP,
       KEY.SourcePort,
       KEY.Host,
       KEY.SniffHost,

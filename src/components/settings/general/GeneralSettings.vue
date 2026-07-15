@@ -87,9 +87,9 @@
           </option>
         </select>
       </SettingItem>
-      <SettingItem :setting-key="k.geoipCountryDatabaseURL">
+      <SettingItem :setting-key="k.geoipCityDatabaseURL">
         <div class="setting-item-label">
-          {{ $t('geoipCountryDatabaseURL') }}
+          {{ $t('geoipCityDatabaseURL') }}
           <QuestionMarkCircleIcon
             class="h-4 w-4 cursor-pointer"
             @mouseenter="showTip($event, $t('geoipDatabaseURLTip'))"
@@ -97,7 +97,7 @@
         </div>
         <TextInput
           class="flex-2"
-          v-model="geoipCountryDatabaseURL"
+          v-model="geoipCityDatabaseURL"
           :clearable="true"
         />
       </SettingItem>
@@ -113,6 +113,21 @@
           class="flex-2"
           v-model="geoipASNDatabaseURL"
           :clearable="true"
+        />
+      </SettingItem>
+      <SettingItem :setting-key="k.geoipIPInfoToken">
+        <div class="setting-item-label">
+          {{ $t('geoipIPInfoToken') }}
+          <QuestionMarkCircleIcon
+            class="h-4 w-4 cursor-pointer"
+            @mouseenter="showTip($event, $t('geoipIPInfoTokenTip'))"
+          />
+        </div>
+        <input
+          class="input input-sm min-w-0 flex-2"
+          type="password"
+          autocomplete="off"
+          v-model="geoipIPInfoToken"
         />
       </SettingItem>
       <SettingItem
@@ -216,7 +231,8 @@ import {
   disablePullToRefresh,
   displayAllFeatures,
   geoipASNDatabaseURL,
-  geoipCountryDatabaseURL,
+  geoipCityDatabaseURL,
+  geoipIPInfoToken,
   IPInfoAPI,
   scrollAnimationEffect,
   swipeInPages,
@@ -236,8 +252,9 @@ const isVisibleAutoUpgrade = useIsSettingVisible(k.autoUpgradeDashboard)
 const isVisibleAutoDisconnectIdleUDP = useIsSettingVisible(k.autoDisconnectIdleUDP)
 const isVisibleAutoDisconnectIdleUDPTime = useIsSettingVisible(k.autoDisconnectIdleUDPTime)
 const isVisibleIPInfoAPI = useIsSettingVisible(k.IPInfoAPI)
-const isVisibleGeoipCountryDatabaseURL = useIsSettingVisible(k.geoipCountryDatabaseURL)
+const isVisibleGeoipCityDatabaseURL = useIsSettingVisible(k.geoipCityDatabaseURL)
 const isVisibleGeoipASNDatabaseURL = useIsSettingVisible(k.geoipASNDatabaseURL)
+const isVisibleGeoipIPInfoToken = useIsSettingVisible(k.geoipIPInfoToken)
 const isVisibleScrollAnimationEffect = useIsSettingVisible(k.scrollAnimationEffect)
 const isVisibleSwipeInPages = useIsSettingVisible(k.swipeInPages)
 const isVisibleSwipeInTabs = useIsSettingVisible(k.swipeInTabs)
@@ -269,8 +286,9 @@ const hasVisibleGeneralItems = computed(() => {
     isVisibleAutoDisconnectIdleUDP.value ||
     (autoDisconnectIdleUDP.value && isVisibleAutoDisconnectIdleUDPTime.value) ||
     isVisibleIPInfoAPI.value ||
-    isVisibleGeoipCountryDatabaseURL.value ||
+    isVisibleGeoipCityDatabaseURL.value ||
     isVisibleGeoipASNDatabaseURL.value ||
+    isVisibleGeoipIPInfoToken.value ||
     isVisibleScrollAnimationEffect.value ||
     isVisibleSwipeInPages.value ||
     (swipeInPages.value && isVisibleSwipeInTabs.value) ||

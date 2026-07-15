@@ -48,6 +48,7 @@ export enum CONNECTIONS_TABLE_ACCESSOR_KEY {
   Upload = 'ul',
   ConnectTime = 'connectTime',
   SourceIP = 'sourceIP',
+  SourceIPGeoIP = 'sourceIPGeoIP',
   SourcePort = 'sourcePort',
   SniffHost = 'sniffHost',
   Destination = 'destination',
@@ -293,11 +294,11 @@ export enum IP_INFO_API {
   IPAPI = 'ipapi.is',
 }
 
-// GeoLite2 databases (country + ASN), loaded once from the CDN and cached in the
-// browser. Served through jsdelivr so the browser gets the CORS headers a
-// cross-origin fetch needs.
-export const GEOIP_COUNTRY_DATABASE_URL =
-  'https://testingcf.jsdelivr.net/gh/P3TERX/GeoLite.mmdb@download/GeoLite2-Country.mmdb'
+// GeoLite2 databases (city + ASN), loaded once and cached in the browser. The
+// City database exceeds jsDelivr's file-size limit, so it is served from the
+// repository's download branch through GitHub Raw (which provides CORS headers).
+export const GEOIP_CITY_DATABASE_URL =
+  'https://raw.githubusercontent.com/P3TERX/GeoLite.mmdb/download/GeoLite2-City.mmdb'
 export const GEOIP_ASN_DATABASE_URL =
   'https://testingcf.jsdelivr.net/gh/P3TERX/GeoLite.mmdb@download/GeoLite2-ASN.mmdb'
 

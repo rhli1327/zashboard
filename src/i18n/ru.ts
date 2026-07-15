@@ -177,6 +177,7 @@ const ru: LANG_MESSAGE = {
   sortBy: 'Сортировать по',
   rule: 'Правило',
   sourceIP: 'Исходный IP',
+  sourceIPGeoIP: 'GeoIP исходного IP',
   activeConnections: 'Активные',
   closedConnections: 'Закрытые',
   logLevel: 'Уровень журнала',
@@ -191,10 +192,13 @@ const ru: LANG_MESSAGE = {
   destination: 'Разрешенный адрес',
   destinationType: 'Тип разрешения',
   geoip: 'GeoIP',
-  geoipCountryDatabaseURL: 'URL базы стран GeoIP',
+  geoipCityDatabaseURL: 'URL базы городов GeoIP',
   geoipASNDatabaseURL: 'URL базы ASN GeoIP',
+  geoipIPInfoToken: 'Токен IPinfo (необязательно)',
+  geoipIPInfoTokenTip:
+    'IPinfo запрашивается только если локальная база городов не содержит регион или город. Оставьте поле пустым для анонимных запросов; если токен указан, он будет добавлен. Результаты кэшируются в браузере.',
   geoipDatabaseURLTip:
-    'Используется для локального определения информации GeoIP (страна / ASN) для IP-адресов соединений. Файл mmdb загружается по этому адресу и кэшируется в браузере. Оставьте пустым для значения по умолчанию.',
+    'Используется для локального определения информации GeoIP (страна / регион / город / ASN) для IP-адресов соединений. Файл mmdb загружается по этому адресу и кэшируется в браузере. Оставьте пустым для значения по умолчанию.',
   inboundUser: 'Входящий пользователь',
   outboundType: 'Тип исходящего',
   fromOutbound: 'Из исходящего',

@@ -81,6 +81,11 @@ export default defineComponent<{
             {highlightedText(CONNECTIONS_TABLE_ACCESSOR_KEY.SourceIP)}
           </span>
         ),
+        [CONNECTIONS_TABLE_ACCESSOR_KEY.SourceIPGeoIP]: () => (
+          <span class="w-80 grow truncate break-all">
+            {highlightedText(CONNECTIONS_TABLE_ACCESSOR_KEY.SourceIPGeoIP)}
+          </span>
+        ),
         [CONNECTIONS_TABLE_ACCESSOR_KEY.SourcePort]: () => (
           <span class="w-20 grow truncate break-all">
             {highlightedText(CONNECTIONS_TABLE_ACCESSOR_KEY.SourcePort)}

@@ -176,6 +176,7 @@ const zh: LANG_MESSAGE = {
   sortBy: '排序方式',
   rule: '规则',
   sourceIP: '源IP',
+  sourceIPGeoIP: '源IP归属',
   activeConnections: '活跃',
   closedConnections: '已关闭',
   logLevel: '日志等级',
@@ -190,10 +191,13 @@ const zh: LANG_MESSAGE = {
   destination: '解析地址',
   destinationType: '解析类型',
   geoip: '归属信息',
-  geoipCountryDatabaseURL: 'GeoIP 国家库地址',
+  geoipCityDatabaseURL: 'GeoIP 城市/地区库地址',
   geoipASNDatabaseURL: 'GeoIP ASN 库地址',
+  geoipIPInfoToken: 'IPinfo Token（可选）',
+  geoipIPInfoTokenTip:
+    '仅在本地城市库缺少地区和城市时查询 IPinfo。留空使用匿名接口；填写后请求会附带该 Token。查询结果缓存在浏览器中。',
   geoipDatabaseURLTip:
-    '用于本地解析连接 IP 的归属信息(国家 / ASN),从该地址加载 mmdb 并缓存在浏览器中。留空则使用默认地址。',
+    '用于本地解析连接 IP 的归属信息(国家 / 地区 / 城市 / ASN),从该地址加载 mmdb 并缓存在浏览器中。留空则使用默认地址。',
   inboundUser: '入站用户',
   outboundType: '出站类型',
   fromOutbound: '来源出站',
