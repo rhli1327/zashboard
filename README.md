@@ -20,6 +20,29 @@ You can access the online zashboard at the following link:
 
 - [Online zashboard](http://board.zash.run.place)
 
+## **Fork**
+
+This fork adds source IP GeoIP details and publishes a rolling build from its `main` branch.
+
+- Static files: [latest dist.zip](https://github.com/rhli1327/zashboard/releases/download/latest/dist.zip)
+- Container image: `ghcr.io/rhli1327/zashboard:latest` (`linux/amd64` and `linux/arm64`)
+
+Run the container:
+
+```bash
+docker run -d \
+  --name zashboard \
+  --restart unless-stopped \
+  -p 80:80 \
+  ghcr.io/rhli1327/zashboard:latest
+```
+
+Alternatively, extract `dist.zip` and serve the resulting `dist` directory with Nginx or another static web server.
+
+The optional IPinfo token is configured in the dashboard's general settings and stored in that browser. The container does not accept an IPinfo token environment variable because this is a static frontend and embedding a token would expose it to visitors.
+
+The fork checks the upstream `Zephyruso/zashboard` `main` branch daily and opens a pull request when new commits are available. Merging code or build-related changes into this fork's `main` branch refreshes both `dist.zip` and the `latest` container image; documentation-only changes do not trigger a rebuild.
+
 ## **Download**
 
 You can download the zashboard files here:
