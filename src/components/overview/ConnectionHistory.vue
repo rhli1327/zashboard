@@ -196,7 +196,7 @@
 
 <script setup lang="ts">
 import { formatGeoIPInfo, getGeoIPInfoSync } from '@/api/geoip'
-import { ConnectionHistoryType, clearConnectionHistoryFromIndexedDB } from '@/helper/indexeddb'
+import { ConnectionHistoryType } from '@/helper/indexeddb'
 import { showNotification } from '@/helper/notification'
 import { getIPLabelFromMap } from '@/helper/sourceip'
 import { useTooltip } from '@/helper/tooltip'
@@ -204,7 +204,7 @@ import { prettyBytesHelper } from '@/helper/utils'
 import {
   aggregateConnections,
   aggregatedDataMap,
-  initAggregatedDataMap,
+  clearConnectionHistory,
   mergeAggregatedData,
 } from '@/store/connHistory'
 import { activeConnections } from '@/store/connections'
@@ -441,8 +441,7 @@ const checkAndPerformAutoCleanup = async () => {
 
   if (timeSinceLastCleanup >= intervalMs) {
     try {
-      await clearConnectionHistoryFromIndexedDB()
-      await initAggregatedDataMap()
+      await clearConnectionHistory()
       startTime.value = now
     } catch (error) {
       console.error('Failed to perform auto cleanup:', error)
@@ -452,8 +451,7 @@ const checkAndPerformAutoCleanup = async () => {
 
 const handleClearHistory = async () => {
   try {
-    await clearConnectionHistoryFromIndexedDB()
-    await initAggregatedDataMap()
+    await clearConnectionHistory()
     startTime.value = Date.now()
     showClearDialog.value = false
     showNotification({
