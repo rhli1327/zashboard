@@ -57,6 +57,8 @@ const zh: LANG_MESSAGE = {
   trafficNoActualOutbound: '未命名出站',
   trafficAscending: '升序',
   trafficDescending: '降序',
+  trafficSortField: '排序字段',
+  trafficSortOrder: '排序顺序',
   trafficSortBy: '按{field}排序',
   trafficSortDirection: '{field}，{direction}',
   trafficRowsRange: '第 {from}–{to} 条，共 {total} 条',
@@ -80,6 +82,8 @@ const zh: LANG_MESSAGE = {
   trafficExactValueTooLong: '每个精确值最多为 1024 个 UTF-8 字节。',
   trafficRemoveExactValue: '移除精确值',
   trafficClearExactFilters: '清除精确筛选',
+  trafficShowExactFilters: '展开筛选',
+  trafficHideExactFilters: '收起筛选',
 
   // 工具页
   networkQuality: '网络质量',

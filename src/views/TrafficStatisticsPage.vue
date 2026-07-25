@@ -1,11 +1,13 @@
 <template>
   <div class="relative flex h-full min-h-0 flex-col">
     <CtrlsBar>
-      <div class="flex flex-wrap items-center justify-between gap-2 p-2">
-        <div class="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+      <div
+        class="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_2.5rem] items-center gap-2 p-2 md:flex md:flex-wrap md:justify-between"
+      >
+        <div class="contents md:flex md:min-w-0 md:flex-1 md:flex-wrap md:items-center md:gap-2">
           <select
             v-model="selectedRange"
-            class="select select-sm min-w-36"
+            class="select select-sm h-10 min-h-10 w-full min-w-0 text-xs md:h-8 md:min-h-8 md:w-auto md:min-w-36 md:text-sm"
             :aria-label="$t('trafficTimeRange')"
             @change="changeTimeRange"
           >
@@ -17,7 +19,7 @@
 
           <select
             v-model="selectedGroupBy"
-            class="select select-sm min-w-32"
+            class="select select-sm h-10 min-h-10 w-full min-w-0 text-xs md:h-8 md:min-h-8 md:w-auto md:min-w-32 md:text-sm"
             :aria-label="$t('trafficGrouping')"
             @change="resetPageAndLoad"
           >
@@ -31,15 +33,16 @@
         </div>
 
         <button
-          class="btn btn-sm"
+          class="btn btn-sm h-10 min-h-10 w-10 md:h-8 md:min-h-8 md:w-auto"
           :disabled="trafficSummaryLoading"
+          :aria-label="$t('refresh')"
           @click="refresh"
         >
           <ArrowPathIcon
             class="h-4 w-4"
             :class="{ 'animate-spin': trafficSummaryLoading }"
           />
-          <span class="hidden sm:inline">{{ $t('refresh') }}</span>
+          <span class="hidden md:inline">{{ $t('refresh') }}</span>
         </button>
       </div>
     </CtrlsBar>
@@ -48,8 +51,8 @@
       class="min-h-0 flex-1 overflow-y-auto"
       :style="padding"
     >
-      <div class="flex flex-col gap-3 p-3">
-        <section class="base-container p-4">
+      <div class="flex flex-col gap-2 p-2 md:gap-3 md:p-3">
+        <section class="base-container p-3 md:p-4">
           <div class="flex flex-wrap items-start justify-between gap-3">
             <div>
               <h1 class="text-lg font-semibold">{{ $t('trafficStatistics') }}</h1>
@@ -89,28 +92,43 @@
           </div>
         </section>
 
-        <section class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <div class="base-container p-4">
-            <div class="text-base-content/50 text-xs font-medium tracking-wide uppercase">
+        <section class="base-container divide-base-300 grid grid-cols-3 divide-x">
+          <div class="min-w-0 px-2 py-3 md:p-4">
+            <div
+              class="text-base-content/50 truncate text-center text-[10px] font-medium tracking-wide uppercase md:text-left md:text-xs"
+            >
               {{ $t('upload') }}
             </div>
-            <div class="mt-2 text-2xl font-light tabular-nums">
+            <div
+              class="mt-1 truncate text-center text-base font-medium tabular-nums md:mt-2 md:text-left md:text-2xl md:font-light"
+              :title="formatBytes(totals.uplink)"
+            >
               {{ formatBytes(totals.uplink) }}
             </div>
           </div>
-          <div class="base-container p-4">
-            <div class="text-base-content/50 text-xs font-medium tracking-wide uppercase">
+          <div class="min-w-0 px-2 py-3 md:p-4">
+            <div
+              class="text-base-content/50 truncate text-center text-[10px] font-medium tracking-wide uppercase md:text-left md:text-xs"
+            >
               {{ $t('download') }}
             </div>
-            <div class="mt-2 text-2xl font-light tabular-nums">
+            <div
+              class="mt-1 truncate text-center text-base font-medium tabular-nums md:mt-2 md:text-left md:text-2xl md:font-light"
+              :title="formatBytes(totals.downlink)"
+            >
               {{ formatBytes(totals.downlink) }}
             </div>
           </div>
-          <div class="base-container p-4">
-            <div class="text-base-content/50 text-xs font-medium tracking-wide uppercase">
+          <div class="min-w-0 px-2 py-3 md:p-4">
+            <div
+              class="text-base-content/50 truncate text-center text-[10px] font-medium tracking-wide uppercase md:text-left md:text-xs"
+            >
               {{ $t('trafficFlows') }}
             </div>
-            <div class="mt-2 text-2xl font-light tabular-nums">
+            <div
+              class="mt-1 truncate text-center text-base font-medium tabular-nums md:mt-2 md:text-left md:text-2xl md:font-light"
+              :title="totals.connections.toLocaleString()"
+            >
               {{ totals.connections.toLocaleString() }}
             </div>
           </div>
@@ -124,7 +142,7 @@
         </div>
 
         <section class="base-container overflow-hidden">
-          <div class="border-base-300 flex flex-col gap-2 border-b p-3 sm:flex-row">
+          <div class="border-base-300 flex flex-col gap-2 border-b p-3 md:flex-row">
             <div class="relative min-w-0 flex-1">
               <MagnifyingGlassIcon
                 class="text-base-content/35 pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
@@ -132,7 +150,7 @@
               <input
                 v-model="searchInput"
                 type="search"
-                class="input input-sm w-full pr-8 pl-9 sm:max-w-sm"
+                class="input input-sm w-full pr-8 pl-9 md:max-w-sm"
                 :aria-label="$t('trafficSearch')"
                 :placeholder="$t('trafficSearchPlaceholder')"
                 @input="scheduleSearch"
@@ -149,10 +167,12 @@
               </button>
             </div>
 
-            <div class="flex flex-wrap items-center gap-2">
+            <div
+              class="grid w-full grid-cols-2 gap-2 md:flex md:w-auto md:flex-wrap md:items-center"
+            >
               <select
                 v-model="selectedNetwork"
-                class="select select-sm"
+                class="select select-sm w-full min-w-0 md:w-auto"
                 :aria-label="$t('trafficNetworkFilter')"
                 @change="resetPageAndLoad"
               >
@@ -163,7 +183,7 @@
 
               <select
                 v-model.number="selectedPageSize"
-                class="select select-sm"
+                class="select select-sm w-full min-w-0 md:w-auto"
                 :aria-label="$t('trafficPageSize')"
                 @change="resetPageAndLoad"
               >
@@ -174,6 +194,29 @@
                 >
                   {{ $t('trafficRowsPerPage', { count: size }) }}
                 </option>
+              </select>
+
+              <select
+                v-model="selectedSortBy"
+                class="select select-sm w-full min-w-0 md:hidden"
+                :aria-label="$t('trafficSortField')"
+                @change="resetPageAndLoad"
+              >
+                <option value="name">{{ groupingTitle }}</option>
+                <option value="total_bytes">{{ $t('trafficTotalTraffic') }}</option>
+                <option value="uplink_bytes">{{ $t('upload') }}</option>
+                <option value="downlink_bytes">{{ $t('download') }}</option>
+                <option value="connections">{{ $t('trafficFlows') }}</option>
+              </select>
+
+              <select
+                v-model="selectedSortOrder"
+                class="select select-sm w-full min-w-0 md:hidden"
+                :aria-label="$t('trafficSortOrder')"
+                @change="resetPageAndLoad"
+              >
+                <option value="asc">{{ $t('trafficAscending') }}</option>
+                <option value="desc">{{ $t('trafficDescending') }}</option>
               </select>
             </div>
           </div>
@@ -194,17 +237,38 @@
                   {{ $t('trafficExactFiltersHint') }}
                 </p>
               </div>
-              <button
-                type="button"
-                class="btn btn-ghost btn-xs"
-                :disabled="!exactFilterCount"
-                @click="clearExactFilters"
-              >
-                {{ $t('trafficClearExactFilters') }}
-              </button>
+              <div class="flex shrink-0 items-center gap-1">
+                <button
+                  v-if="exactFilterCount"
+                  type="button"
+                  class="btn btn-ghost btn-xs h-10 min-h-10 md:h-6 md:min-h-6"
+                  @click="clearExactFilters"
+                >
+                  {{ $t('trafficClearExactFilters') }}
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-ghost btn-sm h-10 min-h-10 md:hidden"
+                  :aria-expanded="filtersExpanded"
+                  aria-controls="traffic-exact-filter-fields"
+                  @click="filtersExpanded = !filtersExpanded"
+                >
+                  {{
+                    filtersExpanded ? $t('trafficHideExactFilters') : $t('trafficShowExactFilters')
+                  }}
+                  <ChevronDownIcon
+                    class="h-4 w-4 transition-transform"
+                    :class="{ 'rotate-180': filtersExpanded }"
+                  />
+                </button>
+              </div>
             </div>
 
-            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <div
+              id="traffic-exact-filter-fields"
+              class="grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4"
+              :class="filtersExpanded ? 'grid' : 'hidden md:grid'"
+            >
               <TrafficExactValueFilter
                 v-model="selectedRouteTags"
                 :label="$t('trafficRouteTagFilter')"
@@ -262,59 +326,24 @@
           </div>
           <div
             v-else
-            class="overflow-x-auto"
             :class="{ 'opacity-60': trafficSummaryLoading }"
           >
-            <table class="table-sm table">
-              <thead>
-                <tr>
-                  <th
-                    v-for="column in tableColumns"
-                    :key="column.key"
-                    :class="{ 'text-right': column.alignRight }"
-                    :aria-sort="column.sortBy ? ariaSort(column.sortBy) : undefined"
-                  >
-                    <button
-                      v-if="column.sortBy"
-                      type="button"
-                      class="inline-flex w-full items-center gap-1 whitespace-nowrap"
-                      :class="{ 'justify-end': column.alignRight }"
-                      :aria-label="sortButtonLabel(column.label, column.sortBy)"
-                      @click="toggleSort(column.sortBy)"
-                    >
-                      <span>{{ column.label }}</span>
-                      <span
-                        v-if="selectedSortBy === column.sortBy"
-                        class="text-[10px] font-normal opacity-60"
-                      >
-                        {{
-                          selectedSortOrder === 'asc'
-                            ? $t('trafficAscending')
-                            : $t('trafficDescending')
-                        }}
-                      </span>
-                      <component
-                        :is="sortIcon(column.sortBy)"
-                        class="h-3.5 w-3.5 shrink-0"
-                        :class="{
-                          'text-base-content/30': selectedSortBy !== column.sortBy,
-                        }"
-                      />
-                    </button>
-                    <span v-else>{{ column.label }}</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr
-                  v-for="(row, rowIndex) in trafficSummaryRows"
-                  :key="rowKey(row, rowIndex)"
-                >
-                  <td>
+            <div
+              class="divide-base-300 divide-y md:hidden"
+              role="list"
+            >
+              <div
+                v-for="(row, rowIndex) in trafficSummaryRows"
+                :key="`mobile:${rowKey(row, rowIndex)}`"
+                class="p-3"
+                role="listitem"
+              >
+                <div class="flex min-w-0 items-start justify-between gap-3">
+                  <div class="min-w-0 flex-1">
                     <template v-if="selectedGroupBy === 'route_path'">
                       <div
                         v-if="routePath(row).length"
-                        class="flex min-w-max items-center gap-1"
+                        class="flex flex-wrap items-center gap-1"
                       >
                         <template
                           v-for="(tag, tagIndex) in routePath(row)"
@@ -325,7 +354,7 @@
                             class="text-base-content/30 h-3.5 w-3.5 shrink-0"
                           />
                           <span
-                            class="rounded-full px-2 py-0.5 text-xs"
+                            class="max-w-full rounded-full px-2 py-0.5 text-xs break-all"
                             :class="
                               tagIndex === routePath(row).length - 1
                                 ? 'bg-primary/12 text-primary font-medium'
@@ -338,7 +367,7 @@
                       </div>
                       <span
                         v-else
-                        class="text-base-content/45"
+                        class="text-base-content/45 text-sm"
                       >
                         {{ $t('trafficNoRoutePath') }}
                       </span>
@@ -346,14 +375,14 @@
 
                     <div
                       v-else-if="selectedGroupBy === 'destination'"
-                      class="flex items-center gap-2"
+                      class="flex min-w-0 flex-wrap items-center gap-1.5"
                     >
-                      <span class="font-medium">
+                      <span class="min-w-0 text-sm font-medium break-all">
                         {{ row.destination || $t('trafficNoDestination') }}
                       </span>
                       <span
                         v-if="row.destinationType"
-                        class="badge badge-sm badge-ghost uppercase"
+                        class="badge badge-xs badge-ghost shrink-0 uppercase"
                       >
                         {{ destinationTypeLabel(row.destinationType) }}
                       </span>
@@ -361,16 +390,20 @@
 
                     <span
                       v-else-if="selectedGroupBy === 'outbound_group'"
-                      class="badge badge-ghost"
+                      class="bg-base-200 block max-w-full rounded-full px-2 py-0.5 text-sm break-all"
+                      :title="row.outboundGroup || $t('trafficNoOutboundGroup')"
                     >
                       {{ row.outboundGroup || $t('trafficNoOutboundGroup') }}
                     </span>
 
                     <div
                       v-else
-                      class="flex items-center gap-2"
+                      class="flex min-w-0 flex-wrap items-center gap-1.5"
                     >
-                      <span class="badge badge-soft badge-primary">
+                      <span
+                        class="bg-primary/12 text-primary block max-w-full rounded-full px-2 py-0.5 text-sm font-medium break-all"
+                        :title="row.actualOutboundTag || $t('trafficNoActualOutbound')"
+                      >
                         {{ row.actualOutboundTag || $t('trafficNoActualOutbound') }}
                       </span>
                       <span
@@ -382,42 +415,229 @@
                     </div>
 
                     <div
-                      v-if="
-                        selectedGroupBy === 'route_path' &&
-                        (row.actualOutboundType || row.configRevision)
-                      "
-                      class="text-base-content/40 mt-1 flex gap-2 text-xs"
+                      v-if="selectedGroupBy === 'route_path'"
+                      class="text-base-content/40 mt-1 flex min-w-0 flex-wrap items-center gap-1.5 text-[11px]"
                     >
+                      <span class="badge badge-xs badge-ghost uppercase">
+                        {{ row.network || selectedNetwork || '—' }}
+                      </span>
                       <span v-if="row.actualOutboundType">{{ row.actualOutboundType }}</span>
-                      <span v-if="row.configRevision">{{ row.configRevision }}</span>
+                      <span
+                        v-if="row.configRevision"
+                        class="max-w-32 truncate"
+                        :title="row.configRevision"
+                      >
+                        {{ row.configRevision }}
+                      </span>
                     </div>
-                  </td>
-                  <td v-if="selectedGroupBy === 'route_path'">
-                    <span class="badge badge-sm badge-ghost uppercase">
-                      {{ row.network || selectedNetwork || '—' }}
-                    </span>
-                  </td>
-                  <td class="text-right font-mono text-xs tabular-nums">
-                    {{ formatBytes(row.uplinkBytes + row.downlinkBytes) }}
-                  </td>
-                  <td class="text-right font-mono text-xs tabular-nums">
-                    {{ formatBytes(row.uplinkBytes) }}
-                  </td>
-                  <td class="text-right font-mono text-xs tabular-nums">
-                    {{ formatBytes(row.downlinkBytes) }}
-                  </td>
-                  <td class="text-right font-mono text-xs tabular-nums">
-                    {{ row.connections.toLocaleString() }}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                  </div>
+
+                  <div class="shrink-0 text-right">
+                    <div class="text-base-content/45 text-[10px] uppercase">
+                      {{ $t('trafficTotalTraffic') }}
+                    </div>
+                    <div
+                      class="mt-0.5 font-mono text-sm font-medium whitespace-nowrap tabular-nums"
+                      :title="formatBytes(row.uplinkBytes + row.downlinkBytes)"
+                    >
+                      {{ formatBytes(row.uplinkBytes + row.downlinkBytes) }}
+                    </div>
+                  </div>
+                </div>
+
+                <div class="border-base-300 mt-2 grid grid-cols-3 gap-2 border-t pt-2">
+                  <div class="min-w-0">
+                    <div class="text-base-content/45 text-[10px] uppercase">
+                      {{ $t('upload') }}
+                    </div>
+                    <div
+                      class="truncate font-mono text-xs tabular-nums"
+                      :title="formatBytes(row.uplinkBytes)"
+                    >
+                      {{ formatBytes(row.uplinkBytes) }}
+                    </div>
+                  </div>
+                  <div class="min-w-0">
+                    <div class="text-base-content/45 text-[10px] uppercase">
+                      {{ $t('download') }}
+                    </div>
+                    <div
+                      class="truncate font-mono text-xs tabular-nums"
+                      :title="formatBytes(row.downlinkBytes)"
+                    >
+                      {{ formatBytes(row.downlinkBytes) }}
+                    </div>
+                  </div>
+                  <div class="min-w-0 text-right">
+                    <div class="text-base-content/45 text-[10px] uppercase">
+                      {{ $t('trafficFlows') }}
+                    </div>
+                    <div
+                      class="truncate font-mono text-xs tabular-nums"
+                      :title="row.connections.toLocaleString()"
+                    >
+                      {{ row.connections.toLocaleString() }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="hidden overflow-x-auto md:block">
+              <table class="table-sm table">
+                <thead>
+                  <tr>
+                    <th
+                      v-for="column in tableColumns"
+                      :key="column.key"
+                      :class="{ 'text-right': column.alignRight }"
+                      :aria-sort="column.sortBy ? ariaSort(column.sortBy) : undefined"
+                    >
+                      <button
+                        v-if="column.sortBy"
+                        type="button"
+                        class="inline-flex w-full items-center gap-1 whitespace-nowrap"
+                        :class="{ 'justify-end': column.alignRight }"
+                        :aria-label="sortButtonLabel(column.label, column.sortBy)"
+                        @click="toggleSort(column.sortBy)"
+                      >
+                        <span>{{ column.label }}</span>
+                        <span
+                          v-if="selectedSortBy === column.sortBy"
+                          class="text-[10px] font-normal opacity-60"
+                        >
+                          {{
+                            selectedSortOrder === 'asc'
+                              ? $t('trafficAscending')
+                              : $t('trafficDescending')
+                          }}
+                        </span>
+                        <component
+                          :is="sortIcon(column.sortBy)"
+                          class="h-3.5 w-3.5 shrink-0"
+                          :class="{
+                            'text-base-content/30': selectedSortBy !== column.sortBy,
+                          }"
+                        />
+                      </button>
+                      <span v-else>{{ column.label }}</span>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="(row, rowIndex) in trafficSummaryRows"
+                    :key="rowKey(row, rowIndex)"
+                  >
+                    <td>
+                      <template v-if="selectedGroupBy === 'route_path'">
+                        <div
+                          v-if="routePath(row).length"
+                          class="flex min-w-max items-center gap-1"
+                        >
+                          <template
+                            v-for="(tag, tagIndex) in routePath(row)"
+                            :key="`${tagIndex}:${tag}`"
+                          >
+                            <ChevronRightIcon
+                              v-if="tagIndex"
+                              class="text-base-content/30 h-3.5 w-3.5 shrink-0"
+                            />
+                            <span
+                              class="rounded-full px-2 py-0.5 text-xs"
+                              :class="
+                                tagIndex === routePath(row).length - 1
+                                  ? 'bg-primary/12 text-primary font-medium'
+                                  : 'bg-base-200'
+                              "
+                            >
+                              {{ tag }}
+                            </span>
+                          </template>
+                        </div>
+                        <span
+                          v-else
+                          class="text-base-content/45"
+                        >
+                          {{ $t('trafficNoRoutePath') }}
+                        </span>
+                      </template>
+
+                      <div
+                        v-else-if="selectedGroupBy === 'destination'"
+                        class="flex items-center gap-2"
+                      >
+                        <span class="font-medium">
+                          {{ row.destination || $t('trafficNoDestination') }}
+                        </span>
+                        <span
+                          v-if="row.destinationType"
+                          class="badge badge-sm badge-ghost uppercase"
+                        >
+                          {{ destinationTypeLabel(row.destinationType) }}
+                        </span>
+                      </div>
+
+                      <span
+                        v-else-if="selectedGroupBy === 'outbound_group'"
+                        class="badge badge-ghost"
+                      >
+                        {{ row.outboundGroup || $t('trafficNoOutboundGroup') }}
+                      </span>
+
+                      <div
+                        v-else
+                        class="flex items-center gap-2"
+                      >
+                        <span class="badge badge-soft badge-primary">
+                          {{ row.actualOutboundTag || $t('trafficNoActualOutbound') }}
+                        </span>
+                        <span
+                          v-if="row.actualOutboundType"
+                          class="text-base-content/45 text-xs"
+                        >
+                          {{ row.actualOutboundType }}
+                        </span>
+                      </div>
+
+                      <div
+                        v-if="
+                          selectedGroupBy === 'route_path' &&
+                          (row.actualOutboundType || row.configRevision)
+                        "
+                        class="text-base-content/40 mt-1 flex gap-2 text-xs"
+                      >
+                        <span v-if="row.actualOutboundType">{{ row.actualOutboundType }}</span>
+                        <span v-if="row.configRevision">{{ row.configRevision }}</span>
+                      </div>
+                    </td>
+                    <td v-if="selectedGroupBy === 'route_path'">
+                      <span class="badge badge-sm badge-ghost uppercase">
+                        {{ row.network || selectedNetwork || '—' }}
+                      </span>
+                    </td>
+                    <td class="text-right font-mono text-xs tabular-nums">
+                      {{ formatBytes(row.uplinkBytes + row.downlinkBytes) }}
+                    </td>
+                    <td class="text-right font-mono text-xs tabular-nums">
+                      {{ formatBytes(row.uplinkBytes) }}
+                    </td>
+                    <td class="text-right font-mono text-xs tabular-nums">
+                      {{ formatBytes(row.downlinkBytes) }}
+                    </td>
+                    <td class="text-right font-mono text-xs tabular-nums">
+                      {{ row.connections.toLocaleString() }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
 
           <div
-            class="border-base-300 flex flex-wrap items-center justify-between gap-2 border-t p-3"
+            class="border-base-300 flex flex-col items-stretch gap-2 border-t p-3 md:flex-row md:flex-wrap md:items-center md:justify-between"
           >
-            <span class="text-base-content/50 text-xs tabular-nums">
+            <span class="text-base-content/50 text-center text-xs tabular-nums md:text-left">
               {{
                 $t('trafficRowsRange', {
                   from: firstVisibleRow,
@@ -427,18 +647,20 @@
               }}
             </span>
 
-            <div class="flex items-center gap-2">
+            <div
+              class="grid w-full grid-cols-[2.5rem_minmax(0,1fr)_2.5rem] items-center gap-2 md:flex md:w-auto"
+            >
               <button
                 type="button"
-                class="btn btn-sm"
+                class="btn btn-sm h-10 min-h-10 w-10 md:h-8 md:min-h-8 md:w-auto"
                 :disabled="trafficSummaryLoading || currentPage <= 1"
                 :aria-label="$t('trafficPreviousPage')"
                 @click="previousPage"
               >
                 <ChevronLeftIcon class="h-4 w-4" />
-                <span class="hidden sm:inline">{{ $t('trafficPreviousPage') }}</span>
+                <span class="hidden md:inline">{{ $t('trafficPreviousPage') }}</span>
               </button>
-              <span class="text-sm tabular-nums">
+              <span class="text-center text-sm tabular-nums">
                 {{
                   $t('trafficPageStatus', {
                     page: currentPage,
@@ -448,12 +670,12 @@
               </span>
               <button
                 type="button"
-                class="btn btn-sm"
+                class="btn btn-sm h-10 min-h-10 w-10 md:h-8 md:min-h-8 md:w-auto"
                 :disabled="trafficSummaryLoading || currentPage >= totalPages"
                 :aria-label="$t('trafficNextPage')"
                 @click="nextPage"
               >
-                <span class="hidden sm:inline">{{ $t('trafficNextPage') }}</span>
+                <span class="hidden md:inline">{{ $t('trafficNextPage') }}</span>
                 <ChevronRightIcon class="h-4 w-4" />
               </button>
             </div>
@@ -475,6 +697,7 @@ import { queryTrafficSummary } from '@/assembly/traffic'
 import CtrlsBar from '@/components/common/CtrlsBar.vue'
 import TrafficExactValueFilter from '@/components/traffic/TrafficExactValueFilter.vue'
 import { usePaddingForViews } from '@/composables/paddingViews'
+import { isMiddleScreen } from '@/helper/utils'
 import {
   clearTrafficSummaryResult,
   trafficCapabilities,
@@ -491,6 +714,7 @@ import {
   ArrowDownIcon,
   ArrowPathIcon,
   ArrowUpIcon,
+  ChevronDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   ChevronUpDownIcon,
@@ -513,7 +737,8 @@ const selectedRouteTags = ref<string[]>([])
 const selectedGroupTags = ref<string[]>([])
 const selectedActualOutboundTags = ref<string[]>([])
 const selectedDestinations = ref<string[]>([])
-const selectedPageSize = ref(50)
+const filtersExpanded = ref(false)
+const selectedPageSize = ref(isMiddleScreen.value ? 25 : 50)
 const selectedSortBy = ref<TrafficSortBy>('total_bytes')
 const selectedSortOrder = ref<TrafficSortOrder>('desc')
 const searchInput = ref('')

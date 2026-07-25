@@ -56,6 +56,8 @@ const en = {
   trafficNoActualOutbound: 'Unnamed outbound',
   trafficAscending: 'Ascending',
   trafficDescending: 'Descending',
+  trafficSortField: 'Sort field',
+  trafficSortOrder: 'Sort order',
   trafficSortBy: 'Sort by {field}',
   trafficSortDirection: '{field}, {direction}',
   trafficRowsRange: '{from}–{to} of {total}',
@@ -79,6 +81,8 @@ const en = {
   trafficExactValueTooLong: 'Each exact value must be at most 1024 UTF-8 bytes.',
   trafficRemoveExactValue: 'Remove exact value',
   trafficClearExactFilters: 'Clear exact filters',
+  trafficShowExactFilters: 'Show filters',
+  trafficHideExactFilters: 'Hide filters',
 
   // Tools page
   networkQuality: 'Network Quality',

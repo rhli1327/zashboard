@@ -18,8 +18,9 @@
         v-for="value in model"
         :key="value"
         class="badge badge-sm badge-soft max-w-full gap-1"
+        :title="value"
       >
-        <span class="truncate">{{ value }}</span>
+        <span class="min-w-0 flex-1 truncate">{{ value }}</span>
         <button
           type="button"
           class="hover:text-error shrink-0"

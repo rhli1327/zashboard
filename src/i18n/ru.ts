@@ -58,6 +58,8 @@ const ru: LANG_MESSAGE = {
   trafficNoActualOutbound: 'Исходящий узел без имени',
   trafficAscending: 'По возрастанию',
   trafficDescending: 'По убыванию',
+  trafficSortField: 'Поле сортировки',
+  trafficSortOrder: 'Порядок сортировки',
   trafficSortBy: 'Сортировать по {field}',
   trafficSortDirection: '{field}, {direction}',
   trafficRowsRange: '{from}–{to} из {total}',
@@ -81,6 +83,8 @@ const ru: LANG_MESSAGE = {
   trafficExactValueTooLong: 'Каждое точное значение должно занимать не более 1024 байт UTF-8.',
   trafficRemoveExactValue: 'Удалить точное значение',
   trafficClearExactFilters: 'Очистить точные фильтры',
+  trafficShowExactFilters: 'Показать фильтры',
+  trafficHideExactFilters: 'Скрыть фильтры',
 
   // Tools
   networkQuality: 'Качество сети',

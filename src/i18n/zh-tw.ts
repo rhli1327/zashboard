@@ -57,6 +57,8 @@ const zhTW: LANG_MESSAGE = {
   trafficNoActualOutbound: '未命名出站',
   trafficAscending: '升冪',
   trafficDescending: '降冪',
+  trafficSortField: '排序欄位',
+  trafficSortOrder: '排序順序',
   trafficSortBy: '依{field}排序',
   trafficSortDirection: '{field}，{direction}',
   trafficRowsRange: '第 {from}–{to} 筆，共 {total} 筆',
@@ -80,6 +82,8 @@ const zhTW: LANG_MESSAGE = {
   trafficExactValueTooLong: '每個精確值最多為 1024 個 UTF-8 位元組。',
   trafficRemoveExactValue: '移除精確值',
   trafficClearExactFilters: '清除精確篩選',
+  trafficShowExactFilters: '展開篩選',
+  trafficHideExactFilters: '收起篩選',
 
   // 工具頁
   networkQuality: '網路品質',
