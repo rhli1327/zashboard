@@ -21,7 +21,7 @@ const en = {
 
   // Server-backed traffic statistics
   trafficStatisticsDescription:
-    'Server-retained logical payload grouped by routing path and actual outbound.',
+    'Server-retained logical payload grouped and filtered by the selected dimension.',
   trafficTimeRange: 'Time range',
   trafficAllRetained: 'All retained data',
   trafficLast24Hours: 'Last 24 hours',
@@ -33,8 +33,32 @@ const en = {
   trafficNetwork: 'Network',
   trafficFlows: 'Routed flows',
   trafficLoadFailed: 'Failed to load traffic statistics.',
-  trafficResultTruncated:
-    'Only the highest-traffic detail rows are shown. The totals still cover every matching row.',
+  trafficGrouping: 'Group by',
+  trafficGroupRoutePath: 'Routing path',
+  trafficGroupDestinationDomain: 'Destination domain',
+  trafficGroupOutboundGroup: 'Outbound group',
+  trafficGroupActualOutbound: 'Outbound node',
+  trafficSearch: 'Search traffic statistics',
+  trafficSearchPlaceholder: 'Search the selected dimension',
+  trafficClearSearch: 'Clear search',
+  trafficNetworkFilter: 'Filter by network',
+  trafficAllNetworks: 'All networks',
+  trafficPageSize: 'Rows per page',
+  trafficRowsPerPage: '{count} / page',
+  trafficTotalTraffic: 'Total traffic',
+  trafficDomainAvailableFrom: 'Domain data is available from {time}.',
+  trafficNoRoutePath: 'No routing path',
+  trafficNoDestinationDomain: 'No domain or not identified',
+  trafficNoOutboundGroup: 'No outbound group',
+  trafficNoActualOutbound: 'Unnamed outbound',
+  trafficAscending: 'Ascending',
+  trafficDescending: 'Descending',
+  trafficSortBy: 'Sort by {field}',
+  trafficSortDirection: '{field}, {direction}',
+  trafficRowsRange: '{from}–{to} of {total}',
+  trafficPreviousPage: 'Previous',
+  trafficNextPage: 'Next',
+  trafficPageStatus: 'Page {page} of {pages}',
 
   // Tools page
   networkQuality: 'Network Quality',

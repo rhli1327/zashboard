@@ -23,7 +23,7 @@ const ru: LANG_MESSAGE = {
 
   // Server-backed traffic statistics
   trafficStatisticsDescription:
-    'Сохранённая сервером полезная нагрузка по маршруту и фактическому исходящему узлу.',
+    'Сохранённая сервером полезная нагрузка с группировкой и фильтрацией по выбранному измерению.',
   trafficTimeRange: 'Период',
   trafficAllRetained: 'Все сохранённые данные',
   trafficLast24Hours: 'Последние 24 часа',
@@ -35,8 +35,32 @@ const ru: LANG_MESSAGE = {
   trafficNetwork: 'Сеть',
   trafficFlows: 'Маршрутизированные потоки',
   trafficLoadFailed: 'Не удалось загрузить статистику трафика.',
-  trafficResultTruncated:
-    'Показаны только строки с наибольшим трафиком. Итоги охватывают все совпавшие строки.',
+  trafficGrouping: 'Группировка',
+  trafficGroupRoutePath: 'Маршрут',
+  trafficGroupDestinationDomain: 'Целевой домен',
+  trafficGroupOutboundGroup: 'Группа узлов',
+  trafficGroupActualOutbound: 'Исходящий узел',
+  trafficSearch: 'Поиск в статистике трафика',
+  trafficSearchPlaceholder: 'Поиск по выбранному измерению',
+  trafficClearSearch: 'Очистить поиск',
+  trafficNetworkFilter: 'Фильтр по сети',
+  trafficAllNetworks: 'Все сети',
+  trafficPageSize: 'Строк на странице',
+  trafficRowsPerPage: '{count} / страница',
+  trafficTotalTraffic: 'Весь трафик',
+  trafficDomainAvailableFrom: 'Данные доменов доступны с {time}.',
+  trafficNoRoutePath: 'Нет маршрута',
+  trafficNoDestinationDomain: 'Нет домена или не распознан',
+  trafficNoOutboundGroup: 'Нет группы узлов',
+  trafficNoActualOutbound: 'Исходящий узел без имени',
+  trafficAscending: 'По возрастанию',
+  trafficDescending: 'По убыванию',
+  trafficSortBy: 'Сортировать по {field}',
+  trafficSortDirection: '{field}, {direction}',
+  trafficRowsRange: '{from}–{to} из {total}',
+  trafficPreviousPage: 'Назад',
+  trafficNextPage: 'Далее',
+  trafficPageStatus: 'Страница {page} из {pages}',
 
   // Tools
   networkQuality: 'Качество сети',

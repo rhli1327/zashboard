@@ -24,7 +24,7 @@ axios.interceptors.request.use((config) => {
 })
 
 const resolvedErrorUrls = ['/delay', '/healthcheck', '/weights', '/storage/zashboard']
-const silentRejectedUrls = ['/mbox/v1/traffic/capabilities']
+const silentRejectedUrls = ['/mbox/v2/traffic/capabilities']
 
 axios.interceptors.response.use(
   null,

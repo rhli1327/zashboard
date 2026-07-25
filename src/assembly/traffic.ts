@@ -2,13 +2,13 @@ import {
   fetchTrafficCapabilitiesAPI,
   queryTrafficSummaryAPI,
   type TrafficSummaryQueryRequest,
+  type TrafficSummaryQueryResponse,
   type TrafficSummaryRowResponse,
 } from '@/api/traffic'
 import { getBackendConnectionKey } from '@/helper/utils'
 import { activeBackend } from '@/store/setup'
 import {
   clearTrafficStatisticsState,
-  clearTrafficSummaryResult,
   isTrafficCapabilitiesCurrent,
   lastTrafficSummaryQuery,
   trafficCapabilities,
@@ -18,10 +18,11 @@ import {
   trafficStatisticsSupported,
   trafficSummaryFailed,
   trafficSummaryLoading,
+  trafficSummaryPage,
   trafficSummaryRows,
   trafficSummaryTotals,
-  trafficSummaryTruncated,
   trafficSummaryWindow,
+  trafficTargetAvailableFrom,
   type TrafficSummaryRow,
 } from '@/store/trafficStatistics'
 
@@ -71,6 +72,8 @@ const normalizeRow = (row: TrafficSummaryRowResponse): TrafficSummaryRow => ({
   configRevision: row.config_revision,
   routeTag: row.route_tag,
   groupPath: [...row.group_path],
+  destinationDomain: row.destination_domain,
+  outboundGroup: row.outbound_group,
   actualOutboundTag: row.actual_outbound_tag,
   actualOutboundType: row.actual_outbound_type,
   network: row.network,
@@ -79,13 +82,19 @@ const normalizeRow = (row: TrafficSummaryRowResponse): TrafficSummaryRow => ({
   connections: parseUint64(row.connections, 'connections'),
 })
 
-const byTotalTrafficDescending = (left: TrafficSummaryRow, right: TrafficSummaryRow) => {
-  const leftTotal = left.uplinkBytes + left.downlinkBytes
-  const rightTotal = right.uplinkBytes + right.downlinkBytes
-
-  if (leftTotal === rightTotal) return 0
-  return leftTotal > rightTotal ? -1 : 1
+const parseSafeInteger = (value: number, field: string, minimum: number) => {
+  if (!Number.isSafeInteger(value) || value < minimum) {
+    throw new TypeError(`${field} is not a valid integer`)
+  }
+  return value
 }
+
+const parseTrafficSummaryPage = (response: TrafficSummaryQueryResponse) => ({
+  groupBy: response.group_by,
+  page: parseSafeInteger(response.page, 'page', 1),
+  pageSize: parseSafeInteger(response.page_size, 'page_size', 1),
+  totalRows: parseSafeInteger(response.total_rows, 'total_rows', 0),
+})
 
 const isCurrentBackend = (backendKey: string) =>
   getBackendConnectionKey(activeBackend.value) === backendKey
@@ -166,16 +175,34 @@ export const queryTrafficSummary = async (query: TrafficSummaryQueryRequest = {}
   }
 
   const request = ++summaryRequest
-  clearTrafficSummaryResult()
   trafficSummaryLoading.value = true
   trafficSummaryFailed.value = false
   lastTrafficSummaryQuery.value = { ...query }
 
   try {
-    const response = await queryTrafficSummaryAPI(query)
+    let effectiveQuery = { ...query }
+    let response = await queryTrafficSummaryAPI(effectiveQuery)
     if (request !== summaryRequest || !isCurrentBackend(backendKey)) return false
 
-    const rows = response.rows.map(normalizeRow).sort(byTotalTrafficDescending)
+    let page = parseTrafficSummaryPage(response)
+    for (let fallbackAttempt = 0; ; fallbackAttempt++) {
+      const lastPage = Math.max(1, Math.ceil(page.totalRows / page.pageSize))
+      if (page.page <= lastPage) break
+      if (fallbackAttempt >= 2) {
+        throw new RangeError('traffic summary page remained out of range')
+      }
+
+      effectiveQuery = {
+        ...effectiveQuery,
+        page: lastPage,
+        page_size: page.pageSize,
+      }
+      response = await queryTrafficSummaryAPI(effectiveQuery)
+      if (request !== summaryRequest || !isCurrentBackend(backendKey)) return false
+      page = parseTrafficSummaryPage(response)
+    }
+
+    const rows = response.rows.map(normalizeRow)
     const totals = {
       uplink: parseUint64(response.totals.uplink_bytes, 'totals.uplink_bytes'),
       downlink: parseUint64(response.totals.downlink_bytes, 'totals.downlink_bytes'),
@@ -191,13 +218,14 @@ export const queryTrafficSummary = async (query: TrafficSummaryQueryRequest = {}
 
     trafficSummaryRows.value = rows
     trafficSummaryTotals.value = totals
+    trafficSummaryPage.value = page
     trafficSummaryWindow.value = window
-    trafficSummaryTruncated.value = response.truncated === true
+    trafficTargetAvailableFrom.value = response.target_available_from ?? ''
+    lastTrafficSummaryQuery.value = effectiveQuery
     return true
   } catch {
     if (request !== summaryRequest || !isCurrentBackend(backendKey)) return false
 
-    clearTrafficSummaryResult()
     trafficSummaryFailed.value = true
     return false
   } finally {
