@@ -10,6 +10,8 @@ export type TrafficSummaryRow = {
   configRevision: string
   routeTag: string
   groupPath: string[]
+  destination: string
+  destinationType: '' | 'domain' | 'ip'
   destinationDomain: string
   outboundGroup: string
   actualOutboundTag: string
@@ -55,6 +57,8 @@ const requiredDimensions = [
   'config_revision',
   'route_tag',
   'group_path',
+  'destination',
+  'destination_type',
   'destination_domain',
   'outbound_group',
   'actual_outbound_tag',
@@ -64,6 +68,7 @@ const requiredDimensions = [
 
 const requiredGroupings = [
   'route_path',
+  'destination',
   'destination_domain',
   'outbound_group',
   'actual_outbound',
@@ -115,7 +120,7 @@ export const trafficSummaryRows = shallowRef<TrafficSummaryRow[]>([])
 export const trafficSummaryTotals = shallowRef<TrafficSummaryTotals>(emptyTrafficSummaryTotals())
 export const trafficSummaryPage = shallowRef<TrafficSummaryPage>(emptyTrafficSummaryPage())
 export const trafficSummaryWindow = shallowRef<TrafficSummaryWindow | null>(null)
-export const trafficTargetAvailableFrom = ref('')
+export const trafficDestinationAvailableFrom = ref('')
 export const trafficSummaryLoading = ref(false)
 export const trafficSummaryFailed = ref(false)
 export const lastTrafficSummaryQuery = shallowRef<TrafficSummaryQueryRequest>({})
@@ -125,7 +130,7 @@ export const clearTrafficSummaryResult = () => {
   trafficSummaryTotals.value = emptyTrafficSummaryTotals()
   trafficSummaryPage.value = emptyTrafficSummaryPage()
   trafficSummaryWindow.value = null
-  trafficTargetAvailableFrom.value = ''
+  trafficDestinationAvailableFrom.value = ''
 }
 
 export const clearTrafficStatisticsState = () => {

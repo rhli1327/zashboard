@@ -15,6 +15,7 @@ import {
   trafficCapabilitiesChecked,
   trafficCapabilitiesConnectionKey,
   trafficCapabilitiesLoading,
+  trafficDestinationAvailableFrom,
   trafficStatisticsSupported,
   trafficSummaryFailed,
   trafficSummaryLoading,
@@ -22,7 +23,6 @@ import {
   trafficSummaryRows,
   trafficSummaryTotals,
   trafficSummaryWindow,
-  trafficTargetAvailableFrom,
   type TrafficSummaryRow,
 } from '@/store/trafficStatistics'
 
@@ -72,6 +72,8 @@ const normalizeRow = (row: TrafficSummaryRowResponse): TrafficSummaryRow => ({
   configRevision: row.config_revision,
   routeTag: row.route_tag,
   groupPath: [...row.group_path],
+  destination: row.destination,
+  destinationType: row.destination_type,
   destinationDomain: row.destination_domain,
   outboundGroup: row.outbound_group,
   actualOutboundTag: row.actual_outbound_tag,
@@ -220,7 +222,7 @@ export const queryTrafficSummary = async (query: TrafficSummaryQueryRequest = {}
     trafficSummaryTotals.value = totals
     trafficSummaryPage.value = page
     trafficSummaryWindow.value = window
-    trafficTargetAvailableFrom.value = response.target_available_from ?? ''
+    trafficDestinationAvailableFrom.value = response.destination_available_from ?? ''
     lastTrafficSummaryQuery.value = effectiveQuery
     return true
   } catch {

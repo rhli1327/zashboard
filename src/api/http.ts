@@ -30,7 +30,8 @@ axios.interceptors.response.use(
   null,
   async (
     error: AxiosError<{
-      message: string
+      message?: string
+      error?: string
     }>,
   ) => {
     const isCurrentBackendRequest =
@@ -67,7 +68,8 @@ axios.interceptors.response.use(
     } else if (
       ![...resolvedErrorUrls, ...silentRejectedUrls].some((url) => error.config?.url?.endsWith(url))
     ) {
-      const errorMessage = error.response?.data?.message || error.message
+      const errorMessage =
+        error.response?.data?.message || error.response?.data?.error || error.message
 
       showNotification({
         key: errorMessage,

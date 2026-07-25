@@ -6,7 +6,9 @@ export const TRAFFIC_QUERY_PATH = '/mbox/v2/traffic/query'
 export type TrafficMetricScope = 'logical_payload' | (string & {})
 
 export type TrafficGroupBy =
-  'route_path' | 'destination_domain' | 'outbound_group' | 'actual_outbound'
+  'route_path' | 'destination' | 'destination_domain' | 'outbound_group' | 'actual_outbound'
+
+export type TrafficDestinationType = '' | 'domain' | 'ip'
 
 export type TrafficSortBy =
   'name' | 'total_bytes' | 'uplink_bytes' | 'downlink_bytes' | 'connections'
@@ -32,6 +34,7 @@ export type TrafficCapabilitiesResponse = {
   max_page_size: number
   bucket_seconds: number
   retention_seconds: number
+  destination_available_from?: string
   target_available_from?: string
 }
 
@@ -47,6 +50,7 @@ export type TrafficSummaryQueryRequest = {
   route_tags?: string[]
   group_tags?: string[]
   actual_outbound_tags?: string[]
+  destinations?: string[]
   destination_domains?: string[]
   networks?: string[]
 }
@@ -55,6 +59,8 @@ export type TrafficSummaryRowResponse = {
   config_revision: string
   route_tag: string
   group_path: string[]
+  destination: string
+  destination_type: TrafficDestinationType
   destination_domain: string
   outbound_group: string
   actual_outbound_tag: string
@@ -72,6 +78,7 @@ export type TrafficSummaryQueryResponse = {
   total_rows: number
   actual_from?: string
   actual_to?: string
+  destination_available_from?: string
   target_available_from?: string
   totals: {
     uplink_bytes: string

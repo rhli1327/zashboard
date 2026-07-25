@@ -22,8 +22,8 @@
             @change="resetPageAndLoad"
           >
             <option value="route_path">{{ $t('trafficGroupRoutePath') }}</option>
-            <option value="destination_domain">
-              {{ $t('trafficGroupDestinationDomain') }}
+            <option value="destination">
+              {{ $t('trafficGroupDestination') }}
             </option>
             <option value="outbound_group">{{ $t('trafficGroupOutboundGroup') }}</option>
             <option value="actual_outbound">{{ $t('trafficGroupActualOutbound') }}</option>
@@ -74,13 +74,16 @@
             }}
           </div>
           <div
-            v-if="selectedGroupBy === 'destination_domain' && targetAvailableFrom"
+            v-if="
+              (selectedGroupBy === 'destination' || selectedDestinations.length) &&
+              destinationAvailableFrom
+            "
             class="text-info mt-2 flex items-center gap-1.5 text-xs"
           >
             <InformationCircleIcon class="h-4 w-4 shrink-0" />
             {{
-              $t('trafficDomainAvailableFrom', {
-                time: formatTimestamp(targetAvailableFrom),
+              $t('trafficDestinationAvailableFrom', {
+                time: formatTimestamp(destinationAvailableFrom),
               })
             }}
           </div>
@@ -172,6 +175,76 @@
                   {{ $t('trafficRowsPerPage', { count: size }) }}
                 </option>
               </select>
+            </div>
+          </div>
+
+          <div class="border-base-300 border-b p-3">
+            <div class="mb-3 flex flex-wrap items-start justify-between gap-2">
+              <div>
+                <div class="flex items-center gap-2 text-sm font-medium">
+                  <span>{{ $t('trafficExactFilters') }}</span>
+                  <span
+                    v-if="exactFilterCount"
+                    class="badge badge-sm badge-primary"
+                  >
+                    {{ exactFilterCount }}
+                  </span>
+                </div>
+                <p class="text-base-content/45 mt-0.5 text-xs">
+                  {{ $t('trafficExactFiltersHint') }}
+                </p>
+              </div>
+              <button
+                type="button"
+                class="btn btn-ghost btn-xs"
+                :disabled="!exactFilterCount"
+                @click="clearExactFilters"
+              >
+                {{ $t('trafficClearExactFilters') }}
+              </button>
+            </div>
+
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              <TrafficExactValueFilter
+                v-model="selectedRouteTags"
+                :label="$t('trafficRouteTagFilter')"
+                :placeholder="$t('trafficRouteTagFilterPlaceholder')"
+                :hint="$t('trafficExactValueHint')"
+                :remove-label="$t('trafficRemoveExactValue')"
+                :too-many-error="$t('trafficExactValueTooMany')"
+                :too-long-error="$t('trafficExactValueTooLong')"
+                @change="resetPageAndLoad"
+              />
+              <TrafficExactValueFilter
+                v-model="selectedGroupTags"
+                :label="$t('trafficGroupTagFilter')"
+                :placeholder="$t('trafficGroupTagFilterPlaceholder')"
+                :hint="$t('trafficExactValueHint')"
+                :remove-label="$t('trafficRemoveExactValue')"
+                :too-many-error="$t('trafficExactValueTooMany')"
+                :too-long-error="$t('trafficExactValueTooLong')"
+                @change="resetPageAndLoad"
+              />
+              <TrafficExactValueFilter
+                v-model="selectedActualOutboundTags"
+                :label="$t('trafficActualOutboundTagFilter')"
+                :placeholder="$t('trafficActualOutboundTagFilterPlaceholder')"
+                :hint="$t('trafficExactValueHint')"
+                :remove-label="$t('trafficRemoveExactValue')"
+                :too-many-error="$t('trafficExactValueTooMany')"
+                :too-long-error="$t('trafficExactValueTooLong')"
+                @change="resetPageAndLoad"
+              />
+              <TrafficExactValueFilter
+                v-model="selectedDestinations"
+                :label="$t('trafficDestinationFilter')"
+                :placeholder="$t('trafficDestinationFilterPlaceholder')"
+                :hint="$t('trafficExactValueHint')"
+                :remove-label="$t('trafficRemoveExactValue')"
+                :too-many-error="$t('trafficExactValueTooMany')"
+                :too-long-error="$t('trafficExactValueTooLong')"
+                @change="resetPageAndLoad"
+              />
             </div>
           </div>
 
@@ -271,12 +344,20 @@
                       </span>
                     </template>
 
-                    <span
-                      v-else-if="selectedGroupBy === 'destination_domain'"
-                      class="font-medium"
+                    <div
+                      v-else-if="selectedGroupBy === 'destination'"
+                      class="flex items-center gap-2"
                     >
-                      {{ row.destinationDomain || $t('trafficNoDestinationDomain') }}
-                    </span>
+                      <span class="font-medium">
+                        {{ row.destination || $t('trafficNoDestination') }}
+                      </span>
+                      <span
+                        v-if="row.destinationType"
+                        class="badge badge-sm badge-ghost uppercase"
+                      >
+                        {{ destinationTypeLabel(row.destinationType) }}
+                      </span>
+                    </div>
 
                     <span
                       v-else-if="selectedGroupBy === 'outbound_group'"
@@ -392,17 +473,18 @@ import type {
 } from '@/api/traffic'
 import { queryTrafficSummary } from '@/assembly/traffic'
 import CtrlsBar from '@/components/common/CtrlsBar.vue'
+import TrafficExactValueFilter from '@/components/traffic/TrafficExactValueFilter.vue'
 import { usePaddingForViews } from '@/composables/paddingViews'
 import {
   clearTrafficSummaryResult,
   trafficCapabilities,
+  trafficDestinationAvailableFrom,
   trafficSummaryFailed,
   trafficSummaryLoading,
   trafficSummaryPage,
   trafficSummaryRows,
   trafficSummaryTotals,
   trafficSummaryWindow,
-  trafficTargetAvailableFrom,
   type TrafficSummaryRow,
 } from '@/store/trafficStatistics'
 import {
@@ -427,6 +509,10 @@ const { t } = useI18n()
 const selectedRange = ref<RangePreset>('retained')
 const selectedGroupBy = ref<TrafficGroupBy>('route_path')
 const selectedNetwork = ref<NetworkFilter>('')
+const selectedRouteTags = ref<string[]>([])
+const selectedGroupTags = ref<string[]>([])
+const selectedActualOutboundTags = ref<string[]>([])
+const selectedDestinations = ref<string[]>([])
 const selectedPageSize = ref(50)
 const selectedSortBy = ref<TrafficSortBy>('total_bytes')
 const selectedSortOrder = ref<TrafficSortOrder>('desc')
@@ -450,6 +536,7 @@ const pageSizeOptions = computed(() => {
 const groupingTitle = computed(() => {
   const labels: Record<TrafficGroupBy, string> = {
     route_path: t('trafficGroupRoutePath'),
+    destination: t('trafficGroupDestination'),
     destination_domain: t('trafficGroupDestinationDomain'),
     outbound_group: t('trafficGroupOutboundGroup'),
     actual_outbound: t('trafficGroupActualOutbound'),
@@ -501,8 +588,18 @@ const tableColumns = computed<
 })
 
 const totals = trafficSummaryTotals
-const targetAvailableFrom = computed(
-  () => trafficTargetAvailableFrom.value || trafficCapabilities.value?.target_available_from || '',
+const destinationAvailableFrom = computed(
+  () =>
+    trafficDestinationAvailableFrom.value ||
+    trafficCapabilities.value?.destination_available_from ||
+    '',
+)
+const exactFilterCount = computed(
+  () =>
+    selectedRouteTags.value.length +
+    selectedGroupTags.value.length +
+    selectedActualOutboundTags.value.length +
+    selectedDestinations.value.length,
 )
 const currentPage = computed(() => trafficSummaryPage.value.page)
 const totalPages = computed(() =>
@@ -547,6 +644,12 @@ const buildQuery = (page: number): TrafficSummaryQueryRequest => ({
   sort_by: selectedSortBy.value,
   sort_order: selectedSortOrder.value,
   ...(appliedSearch.value ? { search: appliedSearch.value } : {}),
+  ...(selectedRouteTags.value.length ? { route_tags: selectedRouteTags.value } : {}),
+  ...(selectedGroupTags.value.length ? { group_tags: selectedGroupTags.value } : {}),
+  ...(selectedActualOutboundTags.value.length
+    ? { actual_outbound_tags: selectedActualOutboundTags.value }
+    : {}),
+  ...(selectedDestinations.value.length ? { destinations: selectedDestinations.value } : {}),
   ...(selectedNetwork.value ? { networks: [selectedNetwork.value] } : {}),
 })
 
@@ -599,6 +702,16 @@ const clearSearch = () => {
   applySearchNow()
 }
 
+const clearExactFilters = () => {
+  if (!exactFilterCount.value) return
+
+  selectedRouteTags.value = []
+  selectedGroupTags.value = []
+  selectedActualOutboundTags.value = []
+  selectedDestinations.value = []
+  void resetPageAndLoad()
+}
+
 const toggleSort = (sortBy: TrafficSortBy) => {
   if (selectedSortBy.value === sortBy) {
     selectedSortOrder.value = selectedSortOrder.value === 'asc' ? 'desc' : 'asc'
@@ -639,6 +752,12 @@ const sortIcon = (sortBy: TrafficSortBy) => {
   return selectedSortOrder.value === 'asc' ? ArrowUpIcon : ArrowDownIcon
 }
 
+const destinationTypeLabel = (type: TrafficSummaryRow['destinationType']) => {
+  if (type === 'domain') return t('trafficDestinationTypeDomain')
+  if (type === 'ip') return t('trafficDestinationTypeIP')
+  return ''
+}
+
 const routePath = (row: TrafficSummaryRow) => {
   const path = row.groupPath.filter(Boolean)
 
@@ -657,6 +776,8 @@ const rowKey = (row: TrafficSummaryRow, index: number) =>
     row.configRevision,
     row.routeTag,
     row.groupPath.join('\u0000'),
+    row.destination,
+    row.destinationType,
     row.destinationDomain,
     row.outboundGroup,
     row.actualOutboundTag,
