@@ -81,6 +81,24 @@ export const getSingboxUrlFromBackend = (
 export const getSingboxSecret = (end: Pick<Backend, 'type' | 'password'>) =>
   end.type === 'singbox' ? end.password || '' : ''
 
+export const getBackendConnectionKey = (
+  end:
+    | Pick<Backend, 'uuid' | 'type' | 'protocol' | 'host' | 'port' | 'secondaryPath' | 'password'>
+    | null
+    | undefined,
+) =>
+  end
+    ? JSON.stringify([
+        end.uuid,
+        end.type,
+        end.protocol,
+        end.host,
+        end.port,
+        end.secondaryPath || '',
+        end.password || '',
+      ])
+    : ''
+
 export const getLabelFromBackend = (end: Omit<Backend, 'uuid'>) => {
   return end.label || `${end.host}:${end.port}`
 }

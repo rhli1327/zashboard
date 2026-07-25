@@ -1,12 +1,12 @@
-name: Build and Publish
+name: Build and Publish Traffic Statistics
 
 on:
   push:
     branches:
-      - main
+      - traffic-statistics
     paths:
       - '.dockerignore'
-      - '.github/workflows/deploy.yml'
+      - '.github/workflows/traffic-statistics.yml'
       - 'Dockerfile'
       - 'env.d.ts'
       - 'index.html'
@@ -21,10 +21,14 @@ on:
       - 'vite.config.ts'
   workflow_dispatch:
 
+concurrency:
+  group: deploy-traffic-statistics
+  cancel-in-progress: true
+
 jobs:
   publish-dist:
-    name: Publish dist.zip
-    if: github.ref_name == 'main'
+    name: Publish traffic statistics dist.zip
+    if: github.ref_name == 'traffic-statistics'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -49,29 +53,29 @@ jobs:
       - name: Package dist
         run: zip -r dist.zip dist
 
-      - name: Update rolling release
+      - name: Update traffic statistics rolling prerelease
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          git tag --force latest "$GITHUB_SHA"
-          git push origin refs/tags/latest --force
+          git tag --force traffic-statistics-latest "$GITHUB_SHA"
+          git push origin refs/tags/traffic-statistics-latest --force
 
-          if gh release view latest >/dev/null 2>&1; then
-            gh release upload latest dist.zip --clobber
-            gh release edit latest \
-              --title "Latest build" \
-              --notes "Automatically built from the latest main branch." \
-              --latest
+          if gh release view traffic-statistics-latest >/dev/null 2>&1; then
+            gh release upload traffic-statistics-latest dist.zip --clobber
+            gh release edit traffic-statistics-latest \
+              --title "Traffic statistics build" \
+              --notes "Automatically built from the traffic-statistics branch." \
+              --prerelease
           else
-            gh release create latest dist.zip \
-              --title "Latest build" \
-              --notes "Automatically built from the latest main branch." \
-              --latest
+            gh release create traffic-statistics-latest dist.zip \
+              --title "Traffic statistics build" \
+              --notes "Automatically built from the traffic-statistics branch." \
+              --prerelease
           fi
 
   publish-image:
-    name: Publish container image
-    if: github.ref_name == 'main'
+    name: Publish traffic statistics container image
+    if: github.ref_name == 'traffic-statistics'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -92,13 +96,13 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ github.token }}
 
-      - name: Build and publish latest image
+      - name: Build and publish traffic statistics image
         uses: docker/build-push-action@v7
         with:
           context: .
           file: Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ghcr.io/${{ github.repository }}:latest
+          tags: ghcr.io/${{ github.repository }}:traffic-statistics
           cache-from: type=gha
           cache-to: type=gha,mode=max

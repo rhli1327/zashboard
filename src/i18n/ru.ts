@@ -7,6 +7,7 @@ const ru: LANG_MESSAGE = {
   proxies: 'Прокси',
   rules: 'Правила',
   connections: 'Подключения',
+  trafficStatistics: 'Статистика трафика',
   logs: 'Журнал',
   tools: 'Инструменты',
   tailscale: 'Tailscale',
@@ -19,6 +20,24 @@ const ru: LANG_MESSAGE = {
   singboxApi: 'sing-box API',
   singboxConnectionFailed: 'Не удалось подключиться к нативному API sing-box',
   skip: 'Пропустить',
+
+  // Server-backed traffic statistics
+  trafficStatisticsDescription:
+    'Сохранённая сервером полезная нагрузка по маршруту и фактическому исходящему узлу.',
+  trafficTimeRange: 'Период',
+  trafficAllRetained: 'Все сохранённые данные',
+  trafficLast24Hours: 'Последние 24 часа',
+  trafficLast7Days: 'Последние 7 дней',
+  trafficLast30Days: 'Последние 30 дней',
+  trafficLogicalPayload: 'Полезная нагрузка',
+  trafficActualRange: '{from} – {to}',
+  trafficRoutePath: 'Маршрут / группы → исходящий узел',
+  trafficNetwork: 'Сеть',
+  trafficFlows: 'Маршрутизированные потоки',
+  trafficLoadFailed: 'Не удалось загрузить статистику трафика.',
+  trafficResultTruncated:
+    'Показаны только строки с наибольшим трафиком. Итоги охватывают все совпавшие строки.',
+
   // Tools
   networkQuality: 'Качество сети',
   stunTest: 'STUN тест',

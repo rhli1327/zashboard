@@ -5,8 +5,9 @@
 // Clash 通道也可能连到 sing-box 兼容核心,两者语义不同,不可互相替代。
 
 import { probeClashChannel } from '@/api/clash'
-import { getSingboxUrlFromBackend } from '@/helper/utils'
+import { getBackendConnectionKey, getSingboxUrlFromBackend } from '@/helper/utils'
 import { activeBackend } from '@/store/setup'
+import { isTrafficCapabilitiesCurrent, trafficStatisticsSupported } from '@/store/trafficStatistics'
 import type { Backend } from '@/types'
 import { computed } from 'vue'
 
@@ -31,6 +32,10 @@ export const capabilities = computed(() => ({
   smart: hasClashChannel.value,
   upgrade: hasClashChannel.value,
   tools: isSingboxBackend.value,
+  trafficStatistics:
+    !!activeBackend.value &&
+    isTrafficCapabilitiesCurrent(getBackendConnectionKey(activeBackend.value)) &&
+    trafficStatisticsSupported.value,
 }))
 
 // 后端连通性探测(供 Setup / EditBackend 测试连接使用)。

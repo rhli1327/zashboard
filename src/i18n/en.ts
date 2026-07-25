@@ -5,6 +5,7 @@ const en = {
   proxies: 'Proxies',
   rules: 'Rules',
   connections: 'Connections',
+  trafficStatistics: 'Traffic statistics',
   logs: 'Logs',
   tools: 'Tools',
   tailscale: 'Tailscale',
@@ -17,6 +18,24 @@ const en = {
   singboxApi: 'sing-box API',
   singboxConnectionFailed: 'Failed to connect to the sing-box native API',
   skip: 'Skip',
+
+  // Server-backed traffic statistics
+  trafficStatisticsDescription:
+    'Server-retained logical payload grouped by routing path and actual outbound.',
+  trafficTimeRange: 'Time range',
+  trafficAllRetained: 'All retained data',
+  trafficLast24Hours: 'Last 24 hours',
+  trafficLast7Days: 'Last 7 days',
+  trafficLast30Days: 'Last 30 days',
+  trafficLogicalPayload: 'Logical payload',
+  trafficActualRange: '{from} – {to}',
+  trafficRoutePath: 'Route / group path → outbound',
+  trafficNetwork: 'Network',
+  trafficFlows: 'Routed flows',
+  trafficLoadFailed: 'Failed to load traffic statistics.',
+  trafficResultTruncated:
+    'Only the highest-traffic detail rows are shown. The totals still cover every matching row.',
+
   // Tools page
   networkQuality: 'Network Quality',
   stunTest: 'STUN Test',

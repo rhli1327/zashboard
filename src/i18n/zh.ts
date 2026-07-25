@@ -7,6 +7,7 @@ const zh: LANG_MESSAGE = {
   proxies: '代理',
   rules: '规则',
   connections: '连接',
+  trafficStatistics: '流量统计',
   logs: '日志',
   tools: '工具',
   tailscale: 'Tailscale',
@@ -19,6 +20,22 @@ const zh: LANG_MESSAGE = {
   singboxApi: 'sing-box API',
   singboxConnectionFailed: '无法连接 sing-box 原生 API',
   skip: '跳过',
+
+  // 服务端流量统计
+  trafficStatisticsDescription: '由服务端保留的逻辑载荷，按分流路径和实际出站节点汇总。',
+  trafficTimeRange: '时间范围',
+  trafficAllRetained: '全部保留数据',
+  trafficLast24Hours: '最近 24 小时',
+  trafficLast7Days: '最近 7 天',
+  trafficLast30Days: '最近 30 天',
+  trafficLogicalPayload: '逻辑载荷',
+  trafficActualRange: '{from} – {to}',
+  trafficRoutePath: '分流 / 策略组路径 → 出站节点',
+  trafficNetwork: '网络',
+  trafficFlows: '已分流连接',
+  trafficLoadFailed: '加载流量统计失败。',
+  trafficResultTruncated: '明细仅显示流量最高的部分记录；顶部合计仍包含全部匹配记录。',
+
   // 工具页
   networkQuality: '网络质量',
   stunTest: 'STUN 测试',

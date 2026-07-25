@@ -1,4 +1,5 @@
 import { capabilities } from '@/assembly/backend'
+import { ensureTrafficStatisticsCapabilities } from '@/assembly/traffic'
 import { ROUTE_NAME } from '@/constant'
 import { renderRoutes } from '@/helper'
 import { i18n } from '@/i18n'
@@ -33,6 +34,11 @@ const childrenRouter = [
     component: ConnectionsPage,
   },
   {
+    path: 'traffic',
+    name: ROUTE_NAME.trafficStatistics,
+    component: () => import('@/views/TrafficStatisticsPage.vue'),
+  },
+  {
     path: 'logs',
     name: ROUTE_NAME.logs,
     component: LogsPage,
@@ -58,6 +64,7 @@ const childrenRouter = [
 const ROUTE_CAPABILITY: Partial<Record<string, keyof typeof capabilities.value>> = {
   [ROUTE_NAME.rules]: 'rules',
   [ROUTE_NAME.tools]: 'tools',
+  [ROUTE_NAME.trafficStatistics]: 'trafficStatistics',
 }
 
 const router = createRouter({
@@ -92,7 +99,7 @@ const setTitleByName = (name: string | symbol | undefined) => {
   }
 }
 
-router.beforeEach((to, from) => {
+router.beforeEach(async (to, from) => {
   const toIndex = renderRoutes.value.findIndex((item) => item === to.name)
   const fromIndex = renderRoutes.value.findIndex((item) => item === from.name)
 
@@ -107,6 +114,10 @@ router.beforeEach((to, from) => {
   if (!activeBackend.value && to.name !== ROUTE_NAME.setup) {
     router.push({ name: ROUTE_NAME.setup })
     return
+  }
+
+  if (to.name === ROUTE_NAME.trafficStatistics && activeBackend.value) {
+    await ensureTrafficStatisticsCapabilities()
   }
 
   // Block navigation to a page the active backend's channels can't serve.

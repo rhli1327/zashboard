@@ -101,6 +101,7 @@
 
 <script setup lang="ts">
 import { isBackendAvailable } from '@/assembly/backend'
+import { probeTrafficStatisticsCapabilities, resetTrafficStatistics } from '@/assembly/traffic'
 import DialogWrapper from '@/components/common/DialogWrapper.vue'
 import SideBar from '@/components/sidebar/SideBar.vue'
 import { dockTop } from '@/composables/paddingViews'
@@ -109,7 +110,7 @@ import { useSwipeRouter } from '@/composables/swipe'
 import { PROXY_TAB_TYPE, ROUTE_ICON_MAP, RULE_TAB_TYPE } from '@/constant'
 import { renderRoutes } from '@/helper'
 import { showNotification } from '@/helper/notification'
-import { getLabelFromBackend, isMiddleScreen } from '@/helper/utils'
+import { getBackendConnectionKey, getLabelFromBackend, isMiddleScreen } from '@/helper/utils'
 import { fetchConfigs } from '@/assembly/config'
 import { initConnections, stopConnections } from '@/store/connections'
 import { initLogs, stopLogs } from '@/store/logs'
@@ -119,6 +120,10 @@ import { proxiesTabShow } from '@/assembly/proxies'
 import { fetchRules, rulesTabShow } from '@/assembly/rules'
 import { isSidebarCollapsed } from '@/store/settings'
 import { activeBackend, activeUuid, backendList } from '@/store/setup'
+import {
+  isTrafficCapabilitiesCurrent,
+  trafficCapabilitiesConnectionKey,
+} from '@/store/trafficStatistics'
 import type { Backend } from '@/types'
 import { useDocumentVisibility, useElementBounding } from '@vueuse/core'
 import { ref, watch } from 'vue'
@@ -160,8 +165,15 @@ watch(
 )
 
 watch(
-  activeUuid,
-  async () => {
+  activeBackend,
+  async (backend) => {
+    const connectionKey = getBackendConnectionKey(backend)
+
+    // Preserve a direct-navigation probe completed before HomePage mounts, but
+    // never reuse capability state after any connection detail changes.
+    if (trafficCapabilitiesConnectionKey.value !== connectionKey) {
+      resetTrafficStatistics()
+    }
     await resetProxies()
     if (!activeUuid.value) {
       // 后端被清空(登出 / 401 / 新增后端)时关闭常驻流,
@@ -179,6 +191,10 @@ watch(
     initConnections()
     initLogs()
     initSatistic()
+    const currentConnectionKey = getBackendConnectionKey(activeBackend.value)
+    if (currentConnectionKey && !isTrafficCapabilitiesCurrent(currentConnectionKey)) {
+      void probeTrafficStatisticsCapabilities()
+    }
   },
   {
     immediate: true,

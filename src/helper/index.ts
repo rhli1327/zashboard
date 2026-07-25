@@ -153,6 +153,7 @@ export const renderRoutes = computed(() => {
   const routeCapable: Partial<Record<ROUTE_NAME, boolean>> = {
     [ROUTE_NAME.rules]: caps.rules,
     [ROUTE_NAME.tools]: caps.tools,
+    [ROUTE_NAME.trafficStatistics]: caps.trafficStatistics,
   }
   return Object.values(ROUTE_NAME).filter((r) => {
     if (r === ROUTE_NAME.setup) return false
