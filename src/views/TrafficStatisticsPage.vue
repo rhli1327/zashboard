@@ -956,8 +956,11 @@ import CtrlsBar from '@/components/common/CtrlsBar.vue'
 import TrafficExactValueFilter from '@/components/traffic/TrafficExactValueFilter.vue'
 import { usePaddingForViews } from '@/composables/paddingViews'
 import { isMiddleScreen } from '@/helper/utils'
+import { activeUuid } from '@/store/setup'
 import {
   clearTrafficSummaryResult,
+  getTrafficGroupByPreference,
+  setTrafficGroupByPreference,
   trafficCapabilities,
   trafficDestinationAvailableFrom,
   trafficSummaryFailed,
@@ -998,7 +1001,10 @@ type ActiveCondition = {
 
 const { t } = useI18n()
 const selectedRange = ref<RangePreset>('retained')
-const selectedGroupBy = ref<TrafficGroupBy>('route_path')
+const selectedGroupBy = computed<TrafficGroupBy>({
+  get: () => getTrafficGroupByPreference(activeUuid.value),
+  set: (groupBy) => setTrafficGroupByPreference(activeUuid.value, groupBy),
+})
 const selectedNetwork = ref<NetworkFilter>('')
 const selectedRouteTags = ref<string[]>([])
 const selectedGroupTags = ref<string[]>([])

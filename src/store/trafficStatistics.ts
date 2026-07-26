@@ -4,6 +4,7 @@ import type {
   TrafficSortBy,
   TrafficSummaryQueryRequest,
 } from '@/api/traffic'
+import { useStorage } from '@vueuse/core'
 import { computed, ref, shallowRef } from 'vue'
 
 export type TrafficSummaryRow = {
@@ -73,6 +74,32 @@ const requiredGroupings = [
   'outbound_group',
   'actual_outbound',
 ] satisfies TrafficGroupBy[]
+
+const defaultTrafficGroupBy: TrafficGroupBy = 'route_path'
+
+export const trafficGroupByByBackend = useStorage<Record<string, TrafficGroupBy>>(
+  'config/traffic-statistics-group-by-by-backend',
+  {},
+)
+
+export const getTrafficGroupByPreference = (backendUuid: string | null | undefined) => {
+  if (!backendUuid) return defaultTrafficGroupBy
+
+  const groupBy = trafficGroupByByBackend.value[backendUuid]
+  return requiredGroupings.includes(groupBy) ? groupBy : defaultTrafficGroupBy
+}
+
+export const setTrafficGroupByPreference = (
+  backendUuid: string | null | undefined,
+  groupBy: TrafficGroupBy,
+) => {
+  if (!backendUuid || !requiredGroupings.includes(groupBy)) return
+
+  trafficGroupByByBackend.value = {
+    ...trafficGroupByByBackend.value,
+    [backendUuid]: groupBy,
+  }
+}
 
 const requiredSortFields = [
   'name',
