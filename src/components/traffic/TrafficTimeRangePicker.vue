@@ -1,92 +1,110 @@
 <template>
-  <details
-    ref="details"
-    class="dropdown w-full"
-    @toggle="handleToggle"
+  <VueDatePicker
+    ref="picker"
+    v-model="draftRange"
+    class="traffic-time-picker"
+    range
+    :max-date="maximumDate"
+    :locale="datePickerLocale"
+    :week-start="1"
+    :centered="isMiddleScreen"
+    :teleport="true"
+    :formats="formats"
+    :time-config="timeConfig"
+    :action-row="actionRow"
+    :config="pickerConfig"
+    :floating="floatingConfig"
+    :ui="pickerUI"
+    @open="handleOpen"
+    @closed="menuOpen = false"
+    @update:model-value="applyCustomRange"
   >
-    <summary
-      class="btn btn-sm h-10 min-h-10 w-full min-w-0 list-none justify-between px-3 font-normal md:h-8 md:min-h-8 [&::-webkit-details-marker]:hidden"
-      :aria-label="$t('trafficSelectTimeRange')"
-    >
-      <span class="flex min-w-0 items-center gap-2">
-        <CalendarDaysIcon class="text-base-content/45 h-4 w-4 shrink-0" />
-        <span class="truncate">{{ selectedLabel }}</span>
-      </span>
-      <ChevronDownIcon class="text-base-content/45 h-4 w-4 shrink-0" />
-    </summary>
+    <template #trigger>
+      <button
+        type="button"
+        class="btn btn-sm border-base-border bg-base-100 hover:border-base-content/20 h-10 min-h-10 w-full min-w-0 justify-between px-3 font-normal shadow-none md:h-8 md:min-h-8"
+        :aria-label="$t('trafficSelectTimeRange')"
+        :aria-expanded="menuOpen"
+      >
+        <span class="flex min-w-0 items-center gap-2">
+          <CalendarDaysIcon class="text-base-content/45 h-4 w-4 shrink-0" />
+          <span class="truncate">{{ selectedLabel }}</span>
+        </span>
+        <ChevronDownIcon
+          class="text-base-content/45 h-4 w-4 shrink-0 transition-transform"
+          :class="{ 'rotate-180': menuOpen }"
+        />
+      </button>
+    </template>
 
-    <div
-      class="dropdown-content border-base-300 bg-base-100 z-40 mt-2 w-full rounded-xl border p-3 shadow-lg"
-    >
-      <div class="grid grid-cols-2 gap-2">
+    <template #left-sidebar>
+      <div class="traffic-time-presets">
+        <div class="traffic-time-preset-title">
+          {{ $t('trafficRollingTimeRanges') }}
+        </div>
         <button
-          v-for="preset in presets"
+          v-for="preset in rollingPresets"
           :key="preset.value"
           type="button"
-          class="btn btn-sm h-9 min-h-9 justify-start px-3 font-normal"
-          :class="selectedRange === preset.value ? 'btn-primary' : 'btn-ghost bg-base-200/40'"
+          class="traffic-time-preset"
+          :class="{ 'traffic-time-preset-active': selectedRange === preset.value }"
           @click="selectPreset(preset.value)"
         >
           {{ preset.label }}
         </button>
-      </div>
 
-      <div class="border-base-300 mt-3 border-t pt-3">
-        <div class="text-base-content/60 text-xs font-semibold tracking-wider uppercase">
-          {{ $t('trafficCustomTimeRange') }}
+        <div class="traffic-time-preset-title traffic-time-preset-title-spaced">
+          {{ $t('trafficCalendarTimeRanges') }}
         </div>
-        <div class="mt-2 grid gap-2 sm:grid-cols-2">
-          <label class="min-w-0">
-            <span class="text-base-content/55 mb-1 block text-xs">
-              {{ $t('trafficTimeRangeStart') }}
-            </span>
-            <input
-              v-model="draftFrom"
-              type="datetime-local"
-              class="input input-sm h-10 min-h-10 w-full min-w-0 md:h-8 md:min-h-8"
-              :max="draftTo || maximumLocalTime"
-              @input="invalidRange = false"
-            />
-          </label>
-          <label class="min-w-0">
-            <span class="text-base-content/55 mb-1 block text-xs">
-              {{ $t('trafficTimeRangeEnd') }}
-            </span>
-            <input
-              v-model="draftTo"
-              type="datetime-local"
-              class="input input-sm h-10 min-h-10 w-full min-w-0 md:h-8 md:min-h-8"
-              :min="draftFrom"
-              :max="maximumLocalTime"
-              @input="invalidRange = false"
-            />
-          </label>
-        </div>
-        <p
-          v-if="invalidRange"
-          class="text-error mt-2 text-xs"
+        <button
+          v-for="preset in calendarPresets"
+          :key="preset.value"
+          type="button"
+          class="traffic-time-preset"
+          :class="{ 'traffic-time-preset-active': selectedRange === preset.value }"
+          @click="selectPreset(preset.value)"
         >
-          {{ $t('trafficInvalidTimeRange') }}
-        </p>
+          {{ preset.label }}
+        </button>
+
         <button
           type="button"
-          class="btn btn-sm btn-primary mt-3 h-10 min-h-10 w-full md:h-8 md:min-h-8"
-          @click="applyCustomRange"
+          class="traffic-time-preset traffic-time-preset-retained"
+          :class="{ 'traffic-time-preset-active': selectedRange === 'retained' }"
+          @click="selectPreset('retained')"
         >
-          {{ $t('trafficApplyTimeRange') }}
+          {{ $t('trafficAllRetained') }}
         </button>
       </div>
-    </div>
-  </details>
+    </template>
+  </VueDatePicker>
 </template>
 
 <script setup lang="ts">
+import { LANG } from '@/constant'
+import { isMiddleScreen } from '@/helper/utils'
+import { language } from '@/store/settings'
+import { VueDatePicker } from '@vuepic/vue-datepicker'
+import '@vuepic/vue-datepicker/dist/main.css'
 import { CalendarDaysIcon, ChevronDownIcon } from '@heroicons/vue/24/outline'
+import { enUS, ru, zhCN, zhTW } from 'date-fns/locale'
 import dayjs from 'dayjs'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-type TrafficRangePreset = 'retained' | '1h' | '24h' | '7d' | '30d' | 'custom'
+type TrafficRangePreset =
+  | 'retained'
+  | '1h'
+  | '6h'
+  | '24h'
+  | '7d'
+  | '30d'
+  | 'today'
+  | 'yesterday'
+  | 'week'
+  | 'month'
+  | 'last_month'
+  | 'custom'
 
 const props = defineProps<{
   selectedRange: TrafficRangePreset
@@ -99,61 +117,254 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
-const details = ref<HTMLDetailsElement>()
-const draftFrom = ref('')
-const draftTo = ref('')
-const invalidRange = ref(false)
-const maximumLocalTime = ref(dayjs().format('YYYY-MM-DDTHH:mm'))
+const picker = ref<InstanceType<typeof VueDatePicker> | null>(null)
+const draftRange = ref<Date[] | null>(null)
+const maximumDate = ref(new Date())
+const menuOpen = ref(false)
 
-const presets = computed(() => [
-  { value: 'retained' as const, label: t('trafficAllRetained') },
+const rollingPresets = computed(() => [
   { value: '1h' as const, label: t('trafficLastHour') },
+  { value: '6h' as const, label: t('trafficLast6Hours') },
   { value: '24h' as const, label: t('trafficLast24Hours') },
   { value: '7d' as const, label: t('trafficLast7Days') },
   { value: '30d' as const, label: t('trafficLast30Days') },
 ])
 
+const calendarPresets = computed(() => [
+  { value: 'today' as const, label: t('trafficToday') },
+  { value: 'yesterday' as const, label: t('trafficYesterday') },
+  { value: 'week' as const, label: t('trafficThisWeek') },
+  { value: 'month' as const, label: t('trafficThisMonth') },
+  { value: 'last_month' as const, label: t('trafficLastMonth') },
+])
+
+const allPresets = computed(() => [
+  { value: 'retained' as const, label: t('trafficAllRetained') },
+  ...rollingPresets.value,
+  ...calendarPresets.value,
+])
+
 const selectedLabel = computed(() => {
-  const preset = presets.value.find((item) => item.value === props.selectedRange)
+  const preset = allPresets.value.find((item) => item.value === props.selectedRange)
   if (preset) return preset.label
   if (!props.from || !props.to) return t('trafficCustomTimeRange')
 
-  return `${dayjs(props.from).format('YYYY-MM-DD HH:mm')} – ${dayjs(props.to).format(
-    'YYYY-MM-DD HH:mm',
-  )}`
+  const from = dayjs(props.from)
+  const to = dayjs(props.to)
+  if (from.isSame(to, 'day')) {
+    return `${from.format('YYYY-MM-DD HH:mm')} – ${to.format('HH:mm')}`
+  }
+  return `${from.format('YYYY-MM-DD HH:mm')} – ${to.format('YYYY-MM-DD HH:mm')}`
 })
 
-const syncDraft = () => {
-  draftFrom.value = props.from ? dayjs(props.from).format('YYYY-MM-DDTHH:mm') : ''
-  draftTo.value = props.to ? dayjs(props.to).format('YYYY-MM-DDTHH:mm') : maximumLocalTime.value
-  invalidRange.value = false
-}
-
-const close = () => {
-  if (details.value) details.value.open = false
-}
-
-const handleToggle = () => {
-  if (details.value?.open) {
-    maximumLocalTime.value = dayjs().format('YYYY-MM-DDTHH:mm')
-    syncDraft()
+const datePickerLocale = computed(() => {
+  switch (language.value) {
+    case LANG.ZH_CN:
+      return zhCN
+    case LANG.ZH_TW:
+      return zhTW
+    case LANG.RU_RU:
+      return ru
+    default:
+      return enUS
   }
+})
+
+const formats = computed(() => ({
+  input: (dates: Date[]) => formatRange(dates),
+  preview: (dates: Date[]) => formatRange(dates),
+}))
+
+const timeConfig = computed(() => ({
+  enableTimePicker: true,
+  enableSeconds: false,
+  is24: true,
+  minutesIncrement: 5,
+  timePickerInline: true,
+  startTime: [
+    { hours: 0, minutes: 0 },
+    { hours: maximumDate.value.getHours(), minutes: maximumDate.value.getMinutes() },
+  ],
+}))
+
+const actionRow = computed(() => ({
+  showPreview: true,
+  showSelect: true,
+  showCancel: true,
+  selectBtnLabel: t('trafficApplyTimeRange'),
+  cancelBtnLabel: t('trafficCancel'),
+}))
+
+const pickerConfig = {
+  closeOnScroll: false,
+  mobileBreakpoint: 768,
+}
+
+const floatingConfig = {
+  placement: 'bottom-end' as const,
+  offset: 8,
+}
+
+const pickerUI = {
+  menu: 'traffic-time-picker-menu',
+}
+
+const formatRange = (dates: Date[]) => {
+  if (!dates?.length) return ''
+  if (dates.length === 1) return dayjs(dates[0]).format('YYYY-MM-DD HH:mm')
+  return `${dayjs(dates[0]).format('YYYY-MM-DD HH:mm')} – ${dayjs(dates[1]).format(
+    'YYYY-MM-DD HH:mm',
+  )}`
+}
+
+const syncDraftRange = () => {
+  if (props.from && props.to) {
+    draftRange.value = [new Date(props.from), new Date(props.to)]
+    return
+  }
+
+  const now = new Date()
+  draftRange.value = [new Date(now.getFullYear(), now.getMonth(), now.getDate()), now]
+}
+
+const handleOpen = () => {
+  maximumDate.value = new Date()
+  syncDraftRange()
+  menuOpen.value = true
 }
 
 const selectPreset = (range: Exclude<TrafficRangePreset, 'custom'>) => {
   emit('change', range)
-  close()
+  picker.value?.closeMenu()
 }
 
-const applyCustomRange = () => {
-  const from = dayjs(draftFrom.value)
-  const to = dayjs(draftTo.value)
-  if (!from.isValid() || !to.isValid() || !from.isBefore(to) || to.isAfter(dayjs())) {
-    invalidRange.value = true
-    return
-  }
+const applyCustomRange = (range: Date[] | null) => {
+  if (!range || range.length !== 2 || !range[0] || !range[1]) return
+
+  const from = range[0]
+  const to = range[1] > maximumDate.value ? maximumDate.value : range[1]
+  if (from >= to) return
 
   emit('change', 'custom', from.toISOString(), to.toISOString())
-  close()
 }
 </script>
+
+<style>
+.traffic-time-picker-menu {
+  --dp-font-family: inherit;
+  --dp-font-size: 0.8125rem;
+  --dp-preview-font-size: 0.75rem;
+  --dp-border-radius: var(--radius-field);
+  --dp-cell-border-radius: 0.5rem;
+  --dp-background-color: var(--color-base-100);
+  --dp-text-color: var(--color-base-content);
+  --dp-hover-color: color-mix(in srgb, var(--color-base-content) 8%, transparent);
+  --dp-hover-text-color: var(--color-base-content);
+  --dp-hover-icon-color: var(--color-base-content);
+  --dp-primary-color: var(--color-primary);
+  --dp-primary-disabled-color: color-mix(in srgb, var(--color-primary) 45%, transparent);
+  --dp-primary-text-color: var(--color-primary-content);
+  --dp-secondary-color: color-mix(in srgb, var(--color-base-content) 38%, transparent);
+  --dp-border-color: var(--color-base-border);
+  --dp-menu-border-color: var(--color-base-border);
+  --dp-border-color-hover: color-mix(in srgb, var(--color-base-content) 20%, transparent);
+  --dp-border-color-focus: var(--color-primary);
+  --dp-disabled-color: color-mix(in srgb, var(--color-base-content) 6%, transparent);
+  --dp-disabled-color-text: color-mix(in srgb, var(--color-base-content) 30%, transparent);
+  --dp-icon-color: color-mix(in srgb, var(--color-base-content) 55%, transparent);
+  --dp-range-between-dates-background-color: color-mix(
+    in srgb,
+    var(--color-primary) 13%,
+    transparent
+  );
+  --dp-range-between-dates-text-color: var(--color-base-content);
+  --dp-range-between-border-color: transparent;
+  --dp-menu-padding: 0.5rem;
+  --dp-cell-size: 2.25rem;
+  --dp-row-margin: 0.125rem 0;
+  --dp-action-row-padding: 0.625rem;
+  box-shadow: 0 18px 48px color-mix(in srgb, #000 18%, transparent);
+}
+
+.traffic-time-picker-menu .dp--sidebar-left {
+  border-color: var(--color-base-border);
+  padding: 0.5rem;
+}
+
+.traffic-time-picker-menu .dp--action-row {
+  border-top: 1px solid var(--color-base-border);
+}
+
+.traffic-time-picker-menu .dp--action-button {
+  min-height: 2rem;
+  padding-inline: 0.75rem;
+}
+
+.traffic-time-presets {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  width: 14rem;
+  gap: 0.25rem;
+}
+
+.traffic-time-preset-title {
+  grid-column: 1 / -1;
+  padding: 0.25rem 0.5rem;
+  color: color-mix(in srgb, var(--color-base-content) 48%, transparent);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.traffic-time-preset-title-spaced,
+.traffic-time-preset-retained {
+  margin-top: 0.375rem;
+}
+
+.traffic-time-preset-retained {
+  grid-column: 1 / -1;
+}
+
+.traffic-time-preset {
+  min-height: 2rem;
+  padding: 0.375rem 0.5rem;
+  border: 0;
+  border-radius: var(--radius-field);
+  color: var(--color-base-content);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.traffic-time-preset:hover {
+  background: color-mix(in srgb, var(--color-base-content) 8%, transparent);
+}
+
+.traffic-time-preset-active {
+  color: var(--color-primary-content);
+  background: var(--color-primary);
+}
+
+.traffic-time-preset-active:hover {
+  background: var(--color-primary);
+}
+
+@media (max-width: 767px) {
+  .traffic-time-picker-menu {
+    width: min(32rem, calc(100vw - 1rem));
+    max-height: calc(100dvh - 1rem);
+    overflow-y: auto;
+  }
+
+  .traffic-time-picker-menu .dp--sidebar-left {
+    border-right: 0;
+    border-bottom: 1px solid var(--color-base-border);
+  }
+
+  .traffic-time-presets {
+    width: 100%;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+</style>
