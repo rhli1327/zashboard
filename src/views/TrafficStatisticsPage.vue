@@ -27,14 +27,14 @@
       :style="padding"
     >
       <div class="flex flex-col gap-2 p-2 md:gap-3 md:p-3">
-        <section class="base-container overflow-hidden">
+        <section class="base-container relative z-10 overflow-visible">
           <div class="need-blur p-4 pb-3">
             <p class="text-base-content/60 max-w-3xl text-sm">
               {{ $t('trafficStatisticsDescription') }}
             </p>
           </div>
 
-          <div class="need-blur px-4 pb-4">
+          <div class="need-blur relative z-10 px-4 pb-4">
             <div class="bg-base-200/30 rounded-xl p-3 md:p-4">
               <div class="grid gap-3 md:grid-cols-2 md:gap-4">
                 <label class="min-w-0">
@@ -79,23 +79,19 @@
                   </select>
                 </label>
 
-                <label class="min-w-0">
+                <div class="min-w-0">
                   <span
                     class="text-base-content/60 mb-1.5 block text-xs font-semibold tracking-wider uppercase"
                   >
                     {{ $t('trafficTimeRange') }}
                   </span>
-                  <select
-                    v-model="selectedRange"
-                    class="select select-bordered select-sm h-10 min-h-10 w-full min-w-0 md:h-8 md:min-h-8"
+                  <TrafficTimeRangePicker
+                    :selected-range="selectedRange"
+                    :from="frozenWindow.from"
+                    :to="frozenWindow.to"
                     @change="changeTimeRange"
-                  >
-                    <option value="retained">{{ $t('trafficAllRetained') }}</option>
-                    <option value="24h">{{ $t('trafficLast24Hours') }}</option>
-                    <option value="7d">{{ $t('trafficLast7Days') }}</option>
-                    <option value="30d">{{ $t('trafficLast30Days') }}</option>
-                  </select>
-                </label>
+                  />
+                </div>
               </div>
 
               <div class="border-base-300 mt-3 border-t pt-3">
@@ -1015,6 +1011,7 @@ import type { TrafficSummaryRow } from '@/store/trafficStatistics'
 import { queryTrafficSummary } from '@/assembly/traffic'
 import CtrlsBar from '@/components/common/CtrlsBar.vue'
 import TrafficExactValueFilter from '@/components/traffic/TrafficExactValueFilter.vue'
+import TrafficTimeRangePicker from '@/components/traffic/TrafficTimeRangePicker.vue'
 import { usePaddingForViews } from '@/composables/paddingViews'
 import { isMiddleScreen } from '@/helper/utils'
 import { activeUuid } from '@/store/setup'
@@ -1048,7 +1045,7 @@ import dayjs from 'dayjs'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-type RangePreset = 'retained' | '24h' | '7d' | '30d'
+type RangePreset = 'retained' | '1h' | '24h' | '7d' | '30d' | 'custom'
 type NetworkFilter = '' | 'tcp' | 'udp'
 type ActiveConditionKind = 'network' | 'route' | 'group' | 'outbound' | 'destination'
 type ActiveCondition = {
@@ -1305,6 +1302,8 @@ const lastVisibleRow = computed(() =>
 )
 
 const rebuildQueryWindow = () => {
+  if (selectedRange.value === 'custom') return
+
   const bucketMilliseconds = (trafficCapabilities.value?.bucket_seconds ?? 60) * 1000
   const to = new Date(Math.floor(Date.now() / bucketMilliseconds) * bucketMilliseconds)
   if (selectedRange.value === 'retained') {
@@ -1312,6 +1311,7 @@ const rebuildQueryWindow = () => {
     return
   }
   const duration = {
+    '1h': 60 * 60 * 1000,
     '24h': 24 * 60 * 60 * 1000,
     '7d': 7 * 24 * 60 * 60 * 1000,
     '30d': 30 * 24 * 60 * 60 * 1000,
@@ -1411,8 +1411,13 @@ const resetPageAndLoad = () => {
   return load(1)
 }
 
-const changeTimeRange = () => {
-  rebuildQueryWindow()
+const changeTimeRange = (range: RangePreset, from?: string, to?: string) => {
+  selectedRange.value = range
+  if (range === 'custom' && from && to) {
+    frozenWindow.value = { from, to }
+  } else {
+    rebuildQueryWindow()
+  }
   return resetPageAndLoad()
 }
 
@@ -1427,7 +1432,7 @@ const changeGrouping = () => {
 }
 
 const refresh = () => {
-  rebuildQueryWindow()
+  if (selectedRange.value !== 'custom') rebuildQueryWindow()
   return resetPageAndLoad()
 }
 

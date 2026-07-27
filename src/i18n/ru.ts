@@ -25,8 +25,16 @@ const ru: LANG_MESSAGE = {
   trafficStatisticsDescription:
     'Просматривайте сохранённые объёмы отправки, загрузки и число соединений по маршруту, целевому хосту, группе прокси или исходящему узлу.',
   trafficTimeRange: 'Период',
+  trafficSelectTimeRange: 'Выбрать период',
+  trafficCustomTimeRange: 'Произвольный период',
+  trafficTimeRangeStart: 'Начало',
+  trafficTimeRangeEnd: 'Конец',
+  trafficApplyTimeRange: 'Применить период',
+  trafficInvalidTimeRange:
+    'Выберите допустимый период, заканчивающийся не позднее текущего времени.',
   trafficTimeRangeHint: 'Доступны только данные за период хранения на сервере.',
   trafficAllRetained: 'Все сохранённые данные',
+  trafficLastHour: 'Последний час',
   trafficLast24Hours: 'Последние 24 часа',
   trafficLast7Days: 'Последние 7 дней',
   trafficLast30Days: 'Последние 30 дней',
