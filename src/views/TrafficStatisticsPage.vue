@@ -641,13 +641,45 @@
                         </span>
                       </div>
 
-                      <span
+                      <div
                         v-else-if="selectedGroupBy === 'outbound_group'"
-                        class="mt-1 block max-w-full text-sm font-medium break-all"
-                        :title="row.outboundGroup || $t('trafficNoOutboundGroup')"
+                        class="mt-1 min-w-0"
                       >
-                        {{ row.outboundGroup || $t('trafficNoOutboundGroup') }}
-                      </span>
+                        <span
+                          class="block max-w-full text-sm font-medium break-all"
+                          :title="row.outboundGroup || $t('trafficNoOutboundGroup')"
+                        >
+                          {{ row.outboundGroup || $t('trafficNoOutboundGroup') }}
+                        </span>
+                        <div
+                          v-if="!row.outboundGroup && visibleUngroupedOutbounds.length"
+                          class="mt-1.5 flex min-w-0 flex-wrap items-center gap-1"
+                        >
+                          <span class="text-base-content/45 mr-0.5 text-[11px]">
+                            {{ $t('trafficGroupActualOutbound') }}:
+                          </span>
+                          <span
+                            v-for="outbound in visibleUngroupedOutbounds"
+                            :key="`${outbound.tag}\u0000${outbound.type}`"
+                            class="badge badge-xs badge-soft badge-primary h-auto max-w-full py-0.5"
+                            :title="ungroupedOutboundTitle(outbound)"
+                          >
+                            <span class="truncate">{{ ungroupedOutboundLabel(outbound) }}</span>
+                            <span
+                              v-if="outbound.type && outbound.type !== outbound.tag"
+                              class="opacity-55"
+                            >
+                              · {{ outbound.type }}
+                            </span>
+                          </span>
+                          <span
+                            v-if="hiddenUngroupedOutboundCount"
+                            class="badge badge-xs badge-ghost"
+                          >
+                            +{{ hiddenUngroupedOutboundCount }}
+                          </span>
+                        </div>
+                      </div>
 
                       <div
                         v-else
@@ -828,12 +860,39 @@
                         </span>
                       </div>
 
-                      <span
+                      <div
                         v-else-if="selectedGroupBy === 'outbound_group'"
-                        class="badge badge-ghost"
+                        class="flex min-w-0 flex-wrap items-center gap-1.5"
                       >
-                        {{ row.outboundGroup || $t('trafficNoOutboundGroup') }}
-                      </span>
+                        <span class="badge badge-ghost">
+                          {{ row.outboundGroup || $t('trafficNoOutboundGroup') }}
+                        </span>
+                        <template v-if="!row.outboundGroup && visibleUngroupedOutbounds.length">
+                          <span class="text-base-content/45 text-xs">
+                            {{ $t('trafficGroupActualOutbound') }}:
+                          </span>
+                          <span
+                            v-for="outbound in visibleUngroupedOutbounds"
+                            :key="`${outbound.tag}\u0000${outbound.type}`"
+                            class="badge badge-sm badge-soft badge-primary"
+                            :title="ungroupedOutboundTitle(outbound)"
+                          >
+                            {{ ungroupedOutboundLabel(outbound) }}
+                            <span
+                              v-if="outbound.type && outbound.type !== outbound.tag"
+                              class="opacity-55"
+                            >
+                              · {{ outbound.type }}
+                            </span>
+                          </span>
+                          <span
+                            v-if="hiddenUngroupedOutboundCount"
+                            class="badge badge-sm badge-ghost"
+                          >
+                            +{{ hiddenUngroupedOutboundCount }}
+                          </span>
+                        </template>
+                      </div>
 
                       <div
                         v-else
@@ -945,12 +1004,14 @@
 </template>
 
 <script setup lang="ts">
-import type {
-  TrafficGroupBy,
-  TrafficSortBy,
-  TrafficSortOrder,
-  TrafficSummaryQueryRequest,
+import {
+  queryTrafficSummaryAPI,
+  type TrafficGroupBy,
+  type TrafficSortBy,
+  type TrafficSortOrder,
+  type TrafficSummaryQueryRequest,
 } from '@/api/traffic'
+import type { TrafficSummaryRow } from '@/store/trafficStatistics'
 import { queryTrafficSummary } from '@/assembly/traffic'
 import CtrlsBar from '@/components/common/CtrlsBar.vue'
 import TrafficExactValueFilter from '@/components/traffic/TrafficExactValueFilter.vue'
@@ -969,7 +1030,6 @@ import {
   trafficSummaryRows,
   trafficSummaryTotals,
   trafficSummaryWindow,
-  type TrafficSummaryRow,
 } from '@/store/trafficStatistics'
 import {
   ArrowDownIcon,
@@ -998,6 +1058,10 @@ type ActiveCondition = {
   value: string
   index?: number
 }
+type UngroupedOutbound = {
+  tag: string
+  type: string
+}
 
 const { t } = useI18n()
 const selectedRange = ref<RangePreset>('retained')
@@ -1018,7 +1082,18 @@ const selectedSortOrder = ref<TrafficSortOrder>('desc')
 const searchInput = ref('')
 const appliedSearch = ref('')
 const frozenWindow = ref<Pick<TrafficSummaryQueryRequest, 'from' | 'to'>>({})
+const ungroupedOutbounds = ref<UngroupedOutbound[]>([])
+const ungroupedOutboundTotal = ref(0)
 let searchTimer: ReturnType<typeof setTimeout> | undefined
+let ungroupedOutboundRequest = 0
+
+const maximumVisibleUngroupedOutbounds = 8
+const visibleUngroupedOutbounds = computed(() =>
+  ungroupedOutbounds.value.slice(0, maximumVisibleUngroupedOutbounds),
+)
+const hiddenUngroupedOutboundCount = computed(() =>
+  Math.max(0, ungroupedOutboundTotal.value - visibleUngroupedOutbounds.value.length),
+)
 
 const { padding } = usePaddingForViews({
   offsetTop: 8,
@@ -1265,11 +1340,68 @@ const buildQuery = (page: number): TrafficSummaryQueryRequest => ({
   ...(selectedNetwork.value ? { networks: [selectedNetwork.value] } : {}),
 })
 
+const clearUngroupedOutbounds = () => {
+  ungroupedOutboundRequest++
+  ungroupedOutbounds.value = []
+  ungroupedOutboundTotal.value = 0
+}
+
+const loadUngroupedOutbounds = async () => {
+  const request = ++ungroupedOutboundRequest
+  ungroupedOutbounds.value = []
+  ungroupedOutboundTotal.value = 0
+
+  if (
+    selectedGroupBy.value !== 'outbound_group' ||
+    !trafficSummaryRows.value.some((row) => !row.outboundGroup)
+  ) {
+    return
+  }
+
+  const backendUuid = activeUuid.value
+  try {
+    const response = await queryTrafficSummaryAPI({
+      ...frozenWindow.value,
+      group_by: 'actual_outbound',
+      group_tags: [''],
+      page: 1,
+      page_size: trafficCapabilities.value?.max_page_size ?? 200,
+      sort_by: 'total_bytes',
+      sort_order: 'desc',
+      ...(selectedRouteTags.value.length ? { route_tags: selectedRouteTags.value } : {}),
+      ...(selectedActualOutboundTags.value.length
+        ? { actual_outbound_tags: selectedActualOutboundTags.value }
+        : {}),
+      ...(selectedDestinations.value.length ? { destinations: selectedDestinations.value } : {}),
+      ...(selectedNetwork.value ? { networks: [selectedNetwork.value] } : {}),
+    })
+    if (
+      request !== ungroupedOutboundRequest ||
+      backendUuid !== activeUuid.value ||
+      selectedGroupBy.value !== 'outbound_group'
+    ) {
+      return
+    }
+
+    ungroupedOutbounds.value = response.rows.map((row) => ({
+      tag: row.actual_outbound_tag,
+      type: row.actual_outbound_type,
+    }))
+    ungroupedOutboundTotal.value = response.total_rows
+  } catch {
+    if (request !== ungroupedOutboundRequest) return
+    ungroupedOutbounds.value = []
+    ungroupedOutboundTotal.value = 0
+  }
+}
+
 const load = async (page: number = currentPage.value) => {
+  clearUngroupedOutbounds()
   const loaded = await queryTrafficSummary(buildQuery(page))
 
   if (loaded) {
     selectedPageSize.value = trafficSummaryPage.value.pageSize
+    void loadUngroupedOutbounds()
   }
   return loaded
 }
@@ -1406,6 +1538,14 @@ const destinationTypeLabel = (type: TrafficSummaryRow['destinationType']) => {
   return ''
 }
 
+const ungroupedOutboundLabel = (outbound: UngroupedOutbound) =>
+  outbound.tag || t('trafficNoActualOutbound')
+
+const ungroupedOutboundTitle = (outbound: UngroupedOutbound) =>
+  outbound.type && outbound.type !== outbound.tag
+    ? `${ungroupedOutboundLabel(outbound)} · ${outbound.type}`
+    : ungroupedOutboundLabel(outbound)
+
 const routePath = (row: TrafficSummaryRow) => {
   const path = row.groupPath.filter(Boolean)
 
@@ -1476,5 +1616,6 @@ onMounted(() => {
 
 onUnmounted(() => {
   if (searchTimer !== undefined) clearTimeout(searchTimer)
+  ungroupedOutboundRequest++
 })
 </script>
