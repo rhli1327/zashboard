@@ -6,7 +6,7 @@
     <div class="settings-grid">
       <SettingItem
         :setting-key="k.actions"
-        :when="!isSingboxBackend"
+        :when="can('dashboardUpgrade')"
       >
         <div class="setting-item-label">
           {{ $t('upgradeDashboard') }}
@@ -27,7 +27,7 @@
       <LanguageSelect />
       <SettingItem
         :setting-key="k.autoUpgradeDashboard"
-        :when="!isSingboxBackend"
+        :when="can('dashboardUpgrade')"
       >
         <div class="setting-item-label">
           {{ $t('autoUpgradeDashboard') }}
@@ -190,7 +190,7 @@
       <KeyboardShortcutsSettings />
       <SettingItem
         :setting-key="k.displayAllFeatures"
-        :when="isSingBoxCore"
+        :when="showDisplayAllFeatures"
       >
         <div class="setting-item-label">
           {{ $t('displayAllFeatures') }}
@@ -210,8 +210,8 @@
 </template>
 
 <script setup lang="ts">
-import { isSingboxBackend } from '@/assembly/backend'
-import { isSingBoxCore, upgradeUIAPI } from '@/assembly/version'
+import { can, showDisplayAllFeatures } from '@/assembly/backend'
+import { upgradeUIAPI } from '@/assembly/version'
 import DashboardSettings from '@/components/common/DashboardSettings.vue'
 import KeyboardShortcutsSettings from '@/components/settings/general/KeyboardShortcutsSettings.vue'
 import LanguageSelect from '@/components/settings/general/LanguageSelect.vue'
@@ -293,7 +293,7 @@ const hasVisibleGeneralItems = computed(() => {
     isVisibleSwipeInPages.value ||
     (swipeInPages.value && isVisibleSwipeInTabs.value) ||
     isVisibleDisablePullToRefresh.value ||
-    (isSingBoxCore.value && isVisibleDisplayAllFeatures.value)
+    (showDisplayAllFeatures.value && isVisibleDisplayAllFeatures.value)
   )
 })
 </script>
