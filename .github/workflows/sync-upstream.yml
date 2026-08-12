@@ -6,6 +6,10 @@ on:
       timezone: Asia/Shanghai
   workflow_dispatch:
 
+concurrency:
+  group: sync-upstream-main
+  cancel-in-progress: true
+
 jobs:
   create-sync-pr:
     name: Create upstream sync PR
@@ -21,6 +25,7 @@ jobs:
       - name: Merge upstream into sync branch
         id: sync
         run: |
+          set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git remote add upstream https://github.com/Zephyruso/zashboard.git
@@ -32,7 +37,13 @@ jobs:
           fi
 
           git switch --force-create sync/upstream-main origin/main
-          git merge --no-edit upstream/main
+          if git merge --no-edit upstream/main; then
+            echo "conflicted=false" >> "$GITHUB_OUTPUT"
+          else
+            git merge --abort
+            git switch --force-create sync/upstream-main upstream/main
+            echo "conflicted=true" >> "$GITHUB_OUTPUT"
+          fi
           git push --force-with-lease origin sync/upstream-main
           echo "updated=true" >> "$GITHUB_OUTPUT"
 
@@ -42,6 +53,12 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
+          if [ "${{ steps.sync.outputs.conflicted }}" = "true" ]; then
+            pr_body="Automated daily sync from Zephyruso/zashboard main. The branches have merge conflicts that require manual resolution."
+          else
+            pr_body="Automated daily sync from Zephyruso/zashboard main. Review local behavior before merging."
+          fi
+
           existing_pr="$(gh pr list \
             --base main \
             --head sync/upstream-main \
@@ -54,5 +71,9 @@ jobs:
               --base main \
               --head sync/upstream-main \
               --title "chore: sync upstream main" \
-              --body "Automated daily sync from Zephyruso/zashboard main. Review conflicts and local behavior before merging."
+              --body "$pr_body"
+          else
+            gh pr edit "$existing_pr" \
+              --title "chore: sync upstream main" \
+              --body "$pr_body"
           fi
