@@ -104,6 +104,12 @@ export enum CONNECTION_DISPLAY_STYLE {
   TABLE = 'table',
 }
 
+// 日志/规则页的展示形态,没有 AUTO —— 由用户在各自的 Ctrl 设置里显式选。
+export enum LIST_DISPLAY_STYLE {
+  CARD = 'card',
+  TABLE = 'table',
+}
+
 export enum RULE_TAB_TYPE {
   RULES = 'rules',
   PROVIDER = 'ruleProvider',
@@ -136,6 +142,7 @@ export enum SORT_DIRECTION {
 export enum CONNECTION_TAB_TYPE {
   ACTIVE = 'activeConnections',
   CLOSED = 'closedConnections',
+  ALL = 'allConnections',
 }
 
 export enum LOG_LEVEL {
@@ -146,6 +153,7 @@ export enum LOG_LEVEL {
   Error = 'error',
   Fatal = 'fatal',
   Panic = 'panic',
+  Silent = 'silent',
 }
 
 export enum ROUTE_NAME {
@@ -194,9 +202,13 @@ export enum PROXY_TYPE {
   Direct = 'direct',
   Reject = 'reject',
   RejectDrop = 'rejectdrop',
+  Block = 'block',
   Compatible = 'compatible',
   Pass = 'pass',
+  PassRule = 'passrule',
+  Rematch = 'rematch',
   Dns = 'dns',
+  Relay = 'relay',
   Selector = 'selector',
   Fallback = 'fallback',
   URLTest = 'urltest',
@@ -314,6 +326,7 @@ export enum OVERVIEW_CARD {
   NetworkCard = 'NetworkCard',
   ProviderTrafficOverview = 'ProviderTrafficOverview',
   TopologyCharts = 'TopologyCharts',
+  EarthGlobeCard = 'EarthGlobeCard',
   ConnectionHistory = 'ConnectionHistory',
   RuleHitCountCard = 'RuleHitCountCard',
 }

@@ -12,6 +12,7 @@ on:
       - 'index.html'
       - 'package.json'
       - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
       - 'postcss.config.js'
       - 'public/**'
       - 'src/**'
