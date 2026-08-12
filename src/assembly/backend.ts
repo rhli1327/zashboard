@@ -118,10 +118,10 @@ const soft = computed(() => {
     reloadConfigs: mihomoOrForkCore,
     updateConfigs: mihomoOrForkCore,
     updateGeoDatabase: mihomoOrForkCore,
-    coreUpdateCheck: mihomoOrForkCore,
     // /storage/zashboard 设置同步,mihomo 扩展
     syncSettings: mihomoOrForkCore,
     independentLatency: mihomoOrForkCore,
+    coreUpdateCheck: mihomo,
     // ports / tun / allow-lan 等 PATCH /configs 配置块。
     configPatch: mihomo,
 
@@ -142,6 +142,8 @@ const soft = computed(() => {
     traceLogLevel: singbox || honk,
     // fatal / panic:仅 sing-box
     extraLogLevels: singbox,
+    // silent:mihomo 与 sing-box 有,honk 没有
+    silentLogLevel: mihomo || singbox,
   }
 })
 
