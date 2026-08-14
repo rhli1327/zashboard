@@ -1012,14 +1012,15 @@ import { queryTrafficSummary } from '@/assembly/traffic'
 import CtrlsBar from '@/components/common/CtrlsBar.vue'
 import TrafficExactValueFilter from '@/components/traffic/TrafficExactValueFilter.vue'
 import TrafficTimeRangePicker from '@/components/traffic/TrafficTimeRangePicker.vue'
+import { useBackendPreference } from '@/composables/backendPreference'
 import { usePaddingForViews } from '@/composables/paddingViews'
 import { isMiddleScreen } from '@/helper/utils'
 import { activeUuid } from '@/store/setup'
 import {
   clearTrafficSummaryResult,
-  getTrafficGroupByPreference,
-  setTrafficGroupByPreference,
+  isTrafficGroupBy,
   trafficCapabilities,
+  trafficGroupByDefault,
   trafficDestinationAvailableFrom,
   trafficSummaryFailed,
   trafficSummaryLoading,
@@ -1059,6 +1060,8 @@ type RangePreset =
   | 'last_month'
   | 'custom'
 type NetworkFilter = '' | 'tcp' | 'udp'
+type TimeRangePreference =
+  { range: Exclude<RangePreset, 'custom'> } | { range: 'custom'; from: string; to: string }
 type ActiveConditionKind = 'network' | 'route' | 'group' | 'outbound' | 'destination'
 type ActiveCondition = {
   key: string
@@ -1073,11 +1076,49 @@ type UngroupedOutbound = {
 }
 
 const { t } = useI18n()
-const selectedRange = ref<RangePreset>('retained')
-const selectedGroupBy = computed<TrafficGroupBy>({
-  get: () => getTrafficGroupByPreference(activeUuid.value),
-  set: (groupBy) => setTrafficGroupByPreference(activeUuid.value, groupBy),
-})
+const rangePresets = [
+  'retained',
+  '1h',
+  '6h',
+  '24h',
+  '7d',
+  '30d',
+  'today',
+  'yesterday',
+  'week',
+  'month',
+  'last_month',
+  'custom',
+] satisfies RangePreset[]
+const isRangePreset = (value: unknown): value is RangePreset =>
+  typeof value === 'string' && rangePresets.includes(value as RangePreset)
+const isTimeRangePreference = (value: unknown): value is TimeRangePreference => {
+  if (!value || typeof value !== 'object' || !('range' in value)) return false
+
+  const preference = value as Partial<TimeRangePreference>
+  if (!isRangePreset(preference.range)) return false
+  if (preference.range !== 'custom') return true
+  if (!('from' in preference) || !('to' in preference)) return false
+  if (typeof preference.from !== 'string' || typeof preference.to !== 'string') return false
+
+  const from = Date.parse(preference.from)
+  const to = Date.parse(preference.to)
+  return Number.isFinite(from) && Number.isFinite(to) && from < to
+}
+
+const selectedGroupBy = useBackendPreference<TrafficGroupBy>(
+  'config/traffic-statistics-group-by-by-backend',
+  activeUuid,
+  trafficGroupByDefault,
+  isTrafficGroupBy,
+)
+const selectedTimeRange = useBackendPreference<TimeRangePreference>(
+  'config/traffic-statistics-time-range-by-backend',
+  activeUuid,
+  { range: 'retained' },
+  isTimeRangePreference,
+)
+const selectedRange = computed(() => selectedTimeRange.value.range)
 const selectedNetwork = ref<NetworkFilter>('')
 const selectedRouteTags = ref<string[]>([])
 const selectedGroupTags = ref<string[]>([])
@@ -1470,10 +1511,13 @@ const resetPageAndLoad = () => {
 }
 
 const changeTimeRange = (range: RangePreset, from?: string, to?: string) => {
-  selectedRange.value = range
-  if (range === 'custom' && from && to) {
+  if (range === 'custom') {
+    if (!from || !to) return
+
+    selectedTimeRange.value = { range, from, to }
     frozenWindow.value = { from, to }
   } else {
+    selectedTimeRange.value = { range }
     rebuildQueryWindow()
   }
   return resetPageAndLoad()
@@ -1673,7 +1717,12 @@ onMounted(() => {
   if (!pageSizeOptions.value.includes(selectedPageSize.value)) {
     selectedPageSize.value = pageSizeOptions.value[0]
   }
-  rebuildQueryWindow()
+  const timeRange = selectedTimeRange.value
+  if (timeRange.range === 'custom') {
+    frozenWindow.value = { from: timeRange.from, to: timeRange.to }
+  } else {
+    rebuildQueryWindow()
+  }
   void load()
 })
 
